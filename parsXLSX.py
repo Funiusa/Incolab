@@ -1,10 +1,11 @@
-import openpyxl
+from openpyxl import load_workbook
 import pandas as pd
 from pathlib import Path
 from math import isnan
 from openpyxl.styles import PatternFill
 import time
 from collections.abc import Iterable
+from file_xlsx import FileXlsx
 from os import path
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
@@ -29,13 +30,12 @@ def fill_row(sheet, row, col, color):
         sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
 
 
-def create_xlsx_file_header(file_path, names_list):  # new file header
+def create_header(new_xlsx, names_list):  # new file header
     count = len(names_list)
-    new_xlsx = FileXlsx(file_path)
     new_xlsx.row_filling(1, count, names_list)
     new_xlsx.color_row(1, 1, count, COLOR_HEADER)
     new_xlsx.wrap_row(1, 1, count + 1)
-    return new_xlsx
+    new_xlsx.save()
 
 
 def get_values(sheet, rw, colons):
@@ -85,44 +85,44 @@ def get_data_from_main_file(path_to_main_file):
     return values_list
 
 
-def fill_new_xlsx(new_xlsx, values, weight_sum):  # Values from main file
+def fill_new_xlsx(new_xlsx, values):  # Values from main file
 
-    row, column = 2, len(values[0])  # Because we already have a header
+    column, row = new_xlsx.column_count(), new_xlsx.rows_count() + 1  # Start from next
     for value in values:
         new_xlsx.row_filling(row, len(value), value)
         row += 1
+    new_xlsx.save()
 
 
-def grand_total_handler(file_path, newxls, column):
+def grand_total_handler(file_path, newxls):
     """ Sum of all weight """
     exel_data = pd.read_excel(file_path).to_dict('list')
 
     weight_list = [weight for weight in exel_data.get('Фактический вес')
                    if not isinstance(weight, Iterable) and not isnan(weight)]
     total_weight = sum(weight_list)
-    row = len(weight_list) + 1  # plus header
+    row, column = newxls.rows_count(), newxls.column_count()
 
-    newxls.color_row(row, 1, column, LIGHT_GREEN)
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
     newxls.one_cell_filling(row + 1, column, total_weight)
     newxls.color_row(row + 1, 1, column, COLOR_HEADER)
 
 
-# def addition_elements():
-#     row -= 1
-#     """ Sum """
-#     new_xlsx.one_cell_filling(row, column + 1, "Сумма:")
-#     new_xlsx.color_one_cell(row, column + 1, DEEP_GREEN)
-#     new_xlsx.one_cell_filling(row, column + 2, weight_sum)
-#     """ Count """
-#     new_xlsx.one_cell_filling(row + 1, column + 1, "Кол-во:")
-#     new_xlsx.color_one_cell(row + 1, column + 1, DEEP_GREEN)
-#     new_xlsx.one_cell_filling(row + 1, column + 2, 5)
+def addition_elements(newxls, weight_sum):
+    newxls.color_row(row, 1, column, LIGHT_GREEN)
+    """ Sum """
+    newxls.one_cell_filling(row, column + 1, "Сумма:")
+    newxls.color_one_cell(row, column + 1, DEEP_GREEN)
+    newxls.one_cell_filling(row, column + 2, weight_sum)
+    """ Count """
+    newxls.one_cell_filling(row + 1, column + 1, "Кол-во:")
+    newxls.color_one_cell(row + 1, column + 1, DEEP_GREEN)
+    newxls.one_cell_filling(row + 1, column + 2, 5)
 
 
 if __name__ == "__main__":
     """ Get values from main file """
-    main_workbook = openpyxl.load_workbook(xlsx_file)  # path to the Excel file
+    main_workbook = load_workbook(xlsx_file)  # path to the Excel file
     sheet = main_workbook.active
     rows = sheet.max_row
     columns = sheet.max_column
@@ -131,9 +131,18 @@ if __name__ == "__main__":
     current_weight_sum = sum(get_weight_sum(xlsx_file))
 
     """ Create new file if doesn't exist """
-    new_xls = create_xlsx_file_header(new_file_path, header_names)
+    new_xls = FileXlsx(new_file_path)
+
+    create_header(new_xls, header_names)
     """ Adding new values """
-    fill_new_xlsx(new_xls, values_from_main_file, current_weight_sum)
-    """ Adding total sum """
-    grand_total_handler(new_file_path, new_xls, len(header_names))
+
+    print(new_xls.rows_count())
+    fill_new_xlsx(new_xls, values_from_main_file)
+    """ Adding sum and count elements """
+    # addition_elements(new_xls, current_weight_sum)
+    # """ Adding total sum """
+    grand_total_handler(new_file_path, new_xls)
+    # print(new_xls.rows_count())
+    # print(new_xls.column_count())
     new_xls.save()
+    new_xls.close()

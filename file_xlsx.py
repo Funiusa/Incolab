@@ -1,17 +1,21 @@
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment
 from openpyxl.comments import Comment
 from openpyxl.styles import PatternFill
+from pathlib import Path
+from os import path
 
 
 class FileXlsx:
     """ Class for creating new instance of xlsx with parameters """
 
-    def __init__(self, path_to_file, create_empty=False):
+    def __init__(self, path_to_file):
         self._path_to_file = path_to_file
-        self._workbook = Workbook()
-        if create_empty:
-            self._workbook.save(path_to_file)
+        if not path.exists(path_to_file):
+            self._workbook = Workbook().save(path_to_file)
+        self._workbook = load_workbook(Path(path_to_file))
+        self._rowCount = 0
+        self._columnCount = 0
 
     def save(self):
         """ Save all work """
@@ -20,6 +24,15 @@ class FileXlsx:
     def close(self):
         """ Close file """
         self._workbook.close()
+
+    def rows_count(self):
+        """ Calculate how many rows in file """
+        return len([row for row in self._workbook.active.values])
+
+    def column_count(self):
+        """ Calculate how many column in file """
+        for elem in self._workbook.active.values:
+            return len(elem)
 
     def one_cell_filling(self, row, column, value):
         """ Add element in one cell """
