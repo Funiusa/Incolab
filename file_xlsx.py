@@ -92,11 +92,9 @@ class FileXlsx:
         except Exception as e:
             print(f"ERROR: {e}")
 
-    # Create subclass for comments
+    # Create subclass for commentscolor, patrn_type
     def comment_one(self, row, column, comment, authon='Noname'):
-        """
-            Add comments on the cell
-        """
+        """ Add comments on the cell """
         try:
             sheet = self._workbook.active
             sheet.cell(row, column).comment = Comment(comment, authon)
@@ -104,7 +102,7 @@ class FileXlsx:
             print(f"ERROR: {e}")
 
     def comment_row(self, row, first_column, end_column, comment, author='Noname'):
-        """Add comment for cells in row"""
+        """ Add comment for cells in row """
         try:
             for i in range(end_column):
                 self.comment_one(row, first_column + i, comment, author)
@@ -112,7 +110,7 @@ class FileXlsx:
             print(f"ERROR: {e}")
 
     def comment_column(self, column, start_row, end_row, comment, author):
-        """Add comment for cells in column"""
+        """ Add comment for cells in column """
         try:
             for i in range(end_row - 1):
                 self.comment_one(start_row + i, column, comment, author)
@@ -121,7 +119,7 @@ class FileXlsx:
 
     # Create subclass for colors
     def color_one_cell(self, row, column, color, patrn_type='solid'):
-        """Add background color for one cell"""
+        """ Add background color for one cell """
         try:
             sheet = self._workbook.active
             sheet.cell(row, column).fill = PatternFill(patternType=patrn_type, fgColor=color)
@@ -129,7 +127,7 @@ class FileXlsx:
             print(f"ERROR: {e}")
 
     def color_row(self, row, first_column, end_column, color, patrn_type='solid'):
-        """Add background color for cells in row"""
+        """ Add background color for cells in row """
         try:
             for i in range(end_column):
                 self.color_one_cell(row, first_column + i, color, patrn_type)
@@ -137,9 +135,47 @@ class FileXlsx:
             print(f"ERROR: {e}")
 
     def color_column(self, column, start_row, end_row, color, patrn_type='solid'):
-        """Add background color for cells in column"""
+        """ Add background color for cells in column """
         try:
             for i in range(end_row - 1):
                 self.color_one_cell(start_row + i, column, color, patrn_type)
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    def clear_color_cell(self, row, column):
+        """ Clear one color cell """
+        try:
+            sheet = self._workbook.active
+            sheet.cell(row, column).fill = PatternFill(fill_type=None)
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    def clear_color_row(self, row, end_column):
+        """ Clear cells in row """
+        try:
+            for column in range(end_column):
+                self.clear_color_cell(row, column + 1)
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    def clear_one_cell(self, row, column):
+        """ Clear element in one cell """
+        sheet = self._workbook.active
+        try:
+            sheet.cell(row, column).value = None
+        except ValueError:
+            print(f"\nERROR: Cannot convert to Excel. "
+                  "Use row/column fillings methods instead.")
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    def clear_row(self, row, column_end):
+        """
+            Filling cells with values in row.
+            All columns and rows must be start at least 1
+        """
+        try:
+            for column in range(column_end):
+                self.clear_one_cell(row, column + 1)
         except Exception as e:
             print(f"ERROR: {e}")

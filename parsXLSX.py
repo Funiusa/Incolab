@@ -22,7 +22,8 @@ LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
 
 # Retrieve cell value
-listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
+#listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
+listCabin = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
 
 
 def fill_row(sheet, row, col, color):
@@ -87,10 +88,16 @@ def get_data_from_main_file(path_to_main_file):
 
 def fill_new_xlsx(new_xlsx, values):  # Values from main file
 
-    column, row = new_xlsx.column_count(), new_xlsx.rows_count() + 1  # Start from next
-    for value in values:
-        new_xlsx.row_filling(row, len(value), value)
+    column = new_xlsx.column_count()
+    row = new_xlsx.rows_count()
+    if row == 1:
         row += 1
+    else:
+        new_xlsx.clear_color_row(row, column)
+    for value in values:
+        new_xlsx.row_filling(row, column, value)
+        row += 1
+
     new_xlsx.save()
 
 
@@ -102,14 +109,14 @@ def grand_total_handler(file_path, newxls):
                    if not isinstance(weight, Iterable) and not isnan(weight)]
     total_weight = sum(weight_list)
     row, column = newxls.rows_count(), newxls.column_count()
-
+    new_xls.color_row(row, 1, column, LIGHT_GREEN)
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
     newxls.one_cell_filling(row + 1, column, total_weight)
     newxls.color_row(row + 1, 1, column, COLOR_HEADER)
 
 
 def addition_elements(newxls, weight_sum):
-    newxls.color_row(row, 1, column, LIGHT_GREEN)
+
     """ Sum """
     newxls.one_cell_filling(row, column + 1, "Сумма:")
     newxls.color_one_cell(row, column + 1, DEEP_GREEN)
@@ -135,14 +142,11 @@ if __name__ == "__main__":
 
     create_header(new_xls, header_names)
     """ Adding new values """
-
-    print(new_xls.rows_count())
     fill_new_xlsx(new_xls, values_from_main_file)
     """ Adding sum and count elements """
     # addition_elements(new_xls, current_weight_sum)
-    # """ Adding total sum """
+    """ Adding total sum """
     grand_total_handler(new_file_path, new_xls)
-    # print(new_xls.rows_count())
-    # print(new_xls.column_count())
+
     new_xls.save()
     new_xls.close()
