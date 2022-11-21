@@ -1,4 +1,3 @@
-import openpyxl
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.comments import Comment
@@ -8,9 +7,8 @@ from openpyxl.styles import PatternFill
 class FileXlsx:
     """ Class for creating new instance of xlsx with parameters """
 
-    def __init__(self, path_to_file, file_name, create_empty=False):
-        self._path_to_file = path_to_file + file_name
-        self._file_name = file_name
+    def __init__(self, path_to_file, create_empty=False):
+        self._path_to_file = path_to_file
         self._workbook = Workbook()
         if create_empty:
             self._workbook.save(path_to_file)
@@ -38,7 +36,7 @@ class FileXlsx:
         """ Wrap cell """
         sheet = self._workbook.active
         try:
-            sheet.cell(row,column).alignment = Alignment(wrapText=True, vertical='top', horizontal='center')
+            sheet.cell(row, column).alignment = Alignment(wrapText=True, vertical='top', horizontal='center')
         except Exception as e:
             print(f"\nERROR: {e}")
 
