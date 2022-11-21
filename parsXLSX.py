@@ -10,7 +10,7 @@ from openpyxl.styles import Alignment
 from file_xlsx import FileXlsx
 
 xlsx_file = Path('./Silvery_Port.xlsx')
-path_for_new_file = './Povogonka.xlsx'
+new_file_path = './test.xlsx'
 
 COLOR_HEADER = 'FFC000'
 COLOR_GRAY = 'BDBBB6'
@@ -70,6 +70,20 @@ def get_weight_sum(path_to_file):
     return [weight[elem] for elem in cabin_num]
 
 
+def grand_total_handler(file_path, newxls, column):
+    """ Sum of all weight """
+    exel_data = pd.read_excel(file_path).to_dict('list')
+
+    weight_list = [weight for weight in exel_data.get('Фактический вес') if type(weight) is float and not isnan(weight)]
+    total_weight = sum(weight_list)
+    row = len(weight_list) + 1  # plus header
+
+    newxls.color_row(row, 1, column, LIGHT_GREEN)
+    newxls.one_cell_filling(row + 1, column - 1, "Итого:")
+    newxls.one_cell_filling(row + 1, column, total_weight)
+    newxls.color_row(row + 1, 1, column, COLOR_HEADER)
+
+
 def get_dataFromMainXSLX(path_to_file):
     main_workbook = openpyxl.load_workbook(path_to_file)  # path to the Excel file
     sheet = main_workbook.active
@@ -99,27 +113,24 @@ def get_dataFromMainXSLX(path_to_file):
     count_rows = len(values_list)
     main_workbook.save(path_to_file)
 
-    newxls = create_xlsx_file_header('./', 'test.xlsx', header_names)
+    newxls = create_xlsx_file_header('./', 'test.xlsx', header_names)  # Change file path
     row = 2  # Because we already have a header
+
     for value in values_list:
         newxls.row_filling(row, len(value), value)
         row += 1
-    print(values_list)
+    column = len(values_list[0])
 
     newxls.one_cell_filling(last_column, last_column + 1, "Сумма:")
     newxls.color_one_cell(last_column, last_column + 1, COLOR_HEADER)
     newxls.one_cell_filling(last_column, last_column + 2, weight_sum)
 
-    newxls.one_cell_filling(last_column + 1, last_column + 1, "Кол-во:")
-    newxls.color_one_cell(last_column + 1, last_column + 1, COLOR_HEADER)
-    newxls.one_cell_filling(last_column + 1, last_column + 2, count_rows)
+    # newxls.one_cell_filling(last_column + 1, last_column + 1, "Кол-во:")
+    # newxls.color_one_cell(last_column + 1, last_column + 1, COLOR_HEADER)
+    # newxls.one_cell_filling(last_column + 1, last_column + 2, count_rows)
 
+    grand_total_handler(new_file_path, newxls, column)
 
-    # Do 
-    """ Sum of all weight """
-    newxls.color_row(last_column, 1, last_column, LIGHT_GREEN)
-    newxls.one_cell_filling(last_column + 1, last_column - 1, "Итого:")
-    newxls.color_row(last_column + 1, 1, last_column, COLOR_HEADER)
     newxls.save()
 
 
