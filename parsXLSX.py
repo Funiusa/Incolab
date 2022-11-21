@@ -15,7 +15,8 @@ new_file_path = './test.xlsx'
 COLOR_HEADER = 'FFC000'
 COLOR_GRAY = 'BDBBB6'
 COLOR_PINK = 'E5D1D0'
-LIGHT_GREEN = 'F0F6E8'
+LIGHT_GREEN = 'B7DEB9'
+DEEP_GREEN = '7BC77F'
 
 # Retrieve cell value
 listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
@@ -77,11 +78,12 @@ def grand_total_handler(file_path, newxls, column):
     weight_list = [weight for weight in exel_data.get('Фактический вес') if type(weight) is float and not isnan(weight)]
     total_weight = sum(weight_list)
     row = len(weight_list) + 1  # plus header
-
     newxls.color_row(row, 1, column, LIGHT_GREEN)
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
     newxls.one_cell_filling(row + 1, column, total_weight)
     newxls.color_row(row + 1, 1, column, COLOR_HEADER)
+
+
 
 
 def get_dataFromMainXSLX(path_to_file):
@@ -122,12 +124,12 @@ def get_dataFromMainXSLX(path_to_file):
     column = len(values_list[0])
 
     newxls.one_cell_filling(last_column, last_column + 1, "Сумма:")
-    newxls.color_one_cell(last_column, last_column + 1, COLOR_HEADER)
+    newxls.color_one_cell(last_column, last_column + 1, DEEP_GREEN)
     newxls.one_cell_filling(last_column, last_column + 2, weight_sum)
 
-    # newxls.one_cell_filling(last_column + 1, last_column + 1, "Кол-во:")
-    # newxls.color_one_cell(last_column + 1, last_column + 1, COLOR_HEADER)
-    # newxls.one_cell_filling(last_column + 1, last_column + 2, count_rows)
+    newxls.one_cell_filling(last_column + 1, last_column + 1, "Кол-во:")
+    newxls.color_one_cell(last_column + 1, last_column + 1, DEEP_GREEN)
+    newxls.one_cell_filling(last_column + 1, last_column + 2, count_rows)
 
     grand_total_handler(new_file_path, newxls, column)
 
