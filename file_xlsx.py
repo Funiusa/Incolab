@@ -3,6 +3,7 @@ from openpyxl.comments import Comment
 from openpyxl.styles import Alignment, PatternFill, Border, Side
 from pathlib import Path
 from os import path
+import openpyxl
 
 
 class FileXlsx:  # TODO use os for getting the path without path
@@ -92,7 +93,7 @@ class FileXlsx:  # TODO use os for getting the path without path
     def border_bottom_row(self, row, start_column, end_column, style='thin'):
         """ Wrap cells in rows. """
         try:
-            for column in range(start_column, end_column):
+            for column in range(start_column, end_column + 1):
                 self.border_bottom_cell(row, column, style)
         except Exception as e:
             print(f"ERROR: {e}")
@@ -217,9 +218,17 @@ class FileXlsx:  # TODO use os for getting the path without path
         sheet.delete_rows(idx=1, amount=5)
 
     def freez_panes_header(self):
-        """ Clear element in one cell """
+        """ Freeze """
         sheet = self._workbook.active
         try:
             sheet.freeze_panes = 'I2'
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    def row_stretch(self, columns):
+        sheet = self._workbook.active
+        try:
+            for i in range(columns):
+                sheet.column_dimensions[chr(ord('A') + i)].width = 13
         except Exception as e:
             print(f"\nERROR: {e}")
