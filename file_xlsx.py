@@ -81,7 +81,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         'double', 'hair', 'mediumDashDot', 'mediumDashDotDot', 
         'dashDot', 'dashDotDot', 'slantDashDot', 'thin', 'medium' """
 
-    def border_bottom_cell(self, row, column, style='thin'):  # TODO class
+    def border_bottom_cell(self, row, column, style='medium'):  # TODO class
         """ Wrap cells in columns """
         sheet = self._workbook.active
         try:
@@ -215,3 +215,11 @@ class FileXlsx:  # TODO use os for getting the path without path
     def delete_rows(self):
         sheet = self._workbook.active
         sheet.delete_rows(idx=1, amount=5)
+
+    def freez_panes_header(self):
+        """ Clear element in one cell """
+        sheet = self._workbook.active
+        try:
+            sheet.freeze_panes = 'I2'
+        except Exception as e:
+            print(f"\nERROR: {e}")

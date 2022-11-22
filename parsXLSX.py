@@ -42,6 +42,7 @@ def create_header(new_xlsx, names_list):  # TODO
     new_xlsx.row_filling(1, column, names_list)
     new_xlsx.color_row(1, 1, column, COLOR_HEADER)
     new_xlsx.wrap_row(1, 1, column + 1)
+    new_xlsx.freez_panes_header()
     new_xlsx.save()
 
 
@@ -114,17 +115,16 @@ def grand_total_handler(file_path, newxls):
 
     row, column = newxls.rows_count(), newxls.get_column_header_count()
 
-    print(f"total row: {row}, column {column}")
+    print(f"total row: {row}, column {column}")  # =============================
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
     newxls.one_cell_filling(row + 1, column, sum(weight_list))
-    newxls.color_row(row + 1, 1, column, COLOR_HEADER)
-
+    newxls.color_row(row + 1, 1, column, COLOR_HEADER, 'mediumGray')
 
 
 def addition_elements(newxls, weight_sum):  # TODO
     row, column = newxls.rows_count(), newxls.get_column_header_count()
 
-    print(f"row {row}, column {column}, last column count {newxls.last_column_count()}")
+    print(f"row {row}, column {column}, last column count {newxls.last_column_count()}")  #####
     """ Count """
     newxls.one_cell_filling(row - 1, column + 1, "Кол-во:")
     newxls.color_one_cell(row - 1, column + 1, LIGHT_GREEN)
