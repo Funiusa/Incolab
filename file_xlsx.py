@@ -15,7 +15,13 @@ class FileXlsx:
             self._workbook = Workbook().save(path_to_file)
         self._workbook = load_workbook(Path(path_to_file))
         self._rowCount = 0
-        self._columnCount = 0
+        self._columnHeaderCount = 0
+
+    def set_column_header_count(self, value):
+        self._columnHeaderCount = value
+
+    def get_column_header_count(self):
+        return self._columnHeaderCount
 
     def save(self):
         """ Save all work """
@@ -29,7 +35,7 @@ class FileXlsx:
         """ Calculate how many rows in file """
         return len([row for row in self._workbook.active.values])
 
-    def column_count(self):
+    def last_column_count(self):
         """ Calculate how many column in file """
         for elem in self._workbook.active.values:
             return len(elem)
@@ -117,6 +123,10 @@ class FileXlsx:
         except Exception as e:
             print(f"ERROR: {e}")
 
+    """'darkHorizontal', 'lightUp', 'lightTrellis', 'lightDown', 
+    'gray125', 'darkDown', 'lightHorizontal', 'lightVertical', 
+    'solid', 'lightGray', 'darkTrellis', 'darkVertical', 'mediumGray',
+     'darkGray', 'darkGrid', 'darkUp', 'lightGrid', 'gray0625'"""
     # Create subclass for colors
     def color_one_cell(self, row, column, color, patrn_type='solid'):
         """ Add background color for one cell """

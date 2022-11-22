@@ -22,8 +22,8 @@ LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
 
 # Retrieve cell value
-#listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
-listCabin = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
+listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
+#listCabin = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
 
 
 def fill_row(sheet, row, col, color):
@@ -31,11 +31,14 @@ def fill_row(sheet, row, col, color):
         sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
 
 
-def create_header(new_xlsx, names_list):  # new file header
-    count = len(names_list)
-    new_xlsx.row_filling(1, count, names_list)
-    new_xlsx.color_row(1, 1, count, COLOR_HEADER)
-    new_xlsx.wrap_row(1, 1, count + 1)
+""" Create header for new file
+    and get the columns number """
+def create_header(new_xlsx, names_list):  # TODO
+    new_xlsx.set_column_header_count(len(names_list))
+    column = new_xlsx.get_column_header_count()
+    new_xlsx.row_filling(1, column, names_list)
+    new_xlsx.color_row(1, 1, column, COLOR_HEADER)
+    new_xlsx.wrap_row(1, 1, column + 1)
     new_xlsx.save()
 
 
@@ -48,17 +51,19 @@ def fill_rows(sheet, row):  # main file
     while sheet.cell(row, column).value:
         sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_PINK)
         column += 1
-    """Add date on the last cell and fill background"""
+    """ Add date on the last cell and fill background """
     sheet.cell(row, column).value = time.strftime("%x")
     sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_GRAY)
 
 
-def get_weight_sum(path_to_file):  # From main file
-    excel_data = pd.read_excel(path_to_file)  # Read the values of the file in the dataframe
-    exel_values = excel_data.to_dict('dict')  # Convert file in dict for keys and values
+def get_current_weight_sum(path_to_file):
+    """ From main file
+        Read the values of the file in the dataframe
+        Convert file in dict for keys and values """
+    excel_data = pd.read_excel(path_to_file)
+    exel_values = excel_data.to_dict('dict')
     cabin_num = []
     weight = excel_data.get("Фактический вес")
-
     for name, val in exel_values.items():
         if name == 'Номер вагона':
             for key, cabin in val.items():
@@ -71,8 +76,7 @@ def get_weight_sum(path_to_file):  # From main file
 def get_data_from_main_file(path_to_main_file):
     """
         Get the values from the main table and colorized
-        First row and column in header
-    """
+        First row and column in header """
     values_list = []
     for row in range(2, rows):
         for column in range(1, columns):
@@ -87,9 +91,7 @@ def get_data_from_main_file(path_to_main_file):
 
 
 def fill_new_xlsx(new_xlsx, values):  # Values from main file
-
-    column = new_xlsx.column_count()
-    row = new_xlsx.rows_count()
+    row, column = new_xlsx.rows_count(), new_xlsx.get_column_header_count()
     if row == 1:
         row += 1
     else:
@@ -97,7 +99,6 @@ def fill_new_xlsx(new_xlsx, values):  # Values from main file
     for value in values:
         new_xlsx.row_filling(row, column, value)
         row += 1
-
     new_xlsx.save()
 
 
@@ -107,24 +108,28 @@ def grand_total_handler(file_path, newxls):
 
     weight_list = [weight for weight in exel_data.get('Фактический вес')
                    if not isinstance(weight, Iterable) and not isnan(weight)]
-    total_weight = sum(weight_list)
-    row, column = newxls.rows_count(), newxls.column_count()
-    new_xls.color_row(row, 1, column, LIGHT_GREEN)
+
+    row, column = newxls.rows_count(), newxls.get_column_header_count()
+
+    print(f"total row: {row}, column {column}")
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
-    newxls.one_cell_filling(row + 1, column, total_weight)
+    newxls.one_cell_filling(row + 1, column, sum(weight_list))
     newxls.color_row(row + 1, 1, column, COLOR_HEADER)
 
 
-def addition_elements(newxls, weight_sum):
+def addition_elements(newxls, weight_sum):  # TODO
+    row, column = newxls.rows_count(), newxls.get_column_header_count()
 
+    print(f"row {row}, column {column}")
+    """ Count """
+    newxls.one_cell_filling(row - 1, column + 1, "Кол-во:")
+    newxls.color_one_cell(row - 1, column + 1, DEEP_GREEN)
+    newxls.one_cell_filling(row - 1, column + 2, 5)
     """ Sum """
+    new_xls.color_row(row, 1, column, LIGHT_GREEN, 'darkGrid')
     newxls.one_cell_filling(row, column + 1, "Сумма:")
     newxls.color_one_cell(row, column + 1, DEEP_GREEN)
     newxls.one_cell_filling(row, column + 2, weight_sum)
-    """ Count """
-    newxls.one_cell_filling(row + 1, column + 1, "Кол-во:")
-    newxls.color_one_cell(row + 1, column + 1, DEEP_GREEN)
-    newxls.one_cell_filling(row + 1, column + 2, 5)
 
 
 if __name__ == "__main__":
@@ -135,7 +140,7 @@ if __name__ == "__main__":
     columns = sheet.max_column
     header_names = [cell.value for cell in list(sheet.rows)[0] if cell.value] + ['Дата послупления']
     values_from_main_file = get_data_from_main_file(xlsx_file)
-    current_weight_sum = sum(get_weight_sum(xlsx_file))
+    current_weight_sum = sum(get_current_weight_sum(xlsx_file))
 
     """ Create new file if doesn't exist """
     new_xls = FileXlsx(new_file_path)
@@ -144,8 +149,8 @@ if __name__ == "__main__":
     """ Adding new values """
     fill_new_xlsx(new_xls, values_from_main_file)
     """ Adding sum and count elements """
-    # addition_elements(new_xls, current_weight_sum)
     """ Adding total sum """
+    addition_elements(new_xls, current_weight_sum)
     grand_total_handler(new_file_path, new_xls)
 
     new_xls.save()
