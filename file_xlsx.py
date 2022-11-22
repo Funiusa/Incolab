@@ -1,12 +1,11 @@
 from openpyxl import Workbook, load_workbook
-from openpyxl.styles import Alignment
 from openpyxl.comments import Comment
-from openpyxl.styles import PatternFill
+from openpyxl.styles import Alignment, PatternFill, Border, Side
 from pathlib import Path
 from os import path
 
 
-class FileXlsx:
+class FileXlsx:  # TODO use os for getting the path without path
     """ Class for creating new instance of xlsx with parameters """
 
     def __init__(self, path_to_file):
@@ -55,7 +54,10 @@ class FileXlsx:
         """ Wrap cell """
         sheet = self._workbook.active
         try:
-            sheet.cell(row, column).alignment = Alignment(wrapText=True, vertical='top', horizontal='center')
+            sheet.cell(row, column).alignment = Alignment(wrapText=True,
+                                                          vertical='top',
+                                                          horizontal='center',
+                                                          shrink_to_fit=True)
         except Exception as e:
             print(f"\nERROR: {e}")
 
@@ -72,6 +74,26 @@ class FileXlsx:
         try:
             for row in range(start_row, end_row):
                 self.wrap_cell(row, column)
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    """ 'dashed', 'mediumDashed', 'thick', 'dotted', 
+        'double', 'hair', 'mediumDashDot', 'mediumDashDotDot', 
+        'dashDot', 'dashDotDot', 'slantDashDot', 'thin', 'medium' """
+
+    def border_bottom_cell(self, row, column, style='thin'):  # TODO class
+        """ Wrap cells in columns """
+        sheet = self._workbook.active
+        try:
+            sheet.cell(row, column).border = Border(bottom=Side(border_style=style))
+        except Exception as e:
+            print(f"ERROR: {e}")
+
+    def border_bottom_row(self, row, start_column, end_column, style='thin'):
+        """ Wrap cells in rows. """
+        try:
+            for column in range(start_column, end_column):
+                self.border_bottom_cell(row, column, style)
         except Exception as e:
             print(f"ERROR: {e}")
 
@@ -99,7 +121,7 @@ class FileXlsx:
             print(f"ERROR: {e}")
 
     # Create subclass for commentscolor, patrn_type
-    def comment_one(self, row, column, comment, authon='Noname'):
+    def comment_one(self, row, column, comment, authon='Noname'):  # TODO class
         """ Add comments on the cell """
         try:
             sheet = self._workbook.active
@@ -128,7 +150,7 @@ class FileXlsx:
     'solid', 'lightGray', 'darkTrellis', 'darkVertical', 'mediumGray',
      'darkGray', 'darkGrid', 'darkUp', 'lightGrid', 'gray0625'"""
     # Create subclass for colors
-    def color_one_cell(self, row, column, color, patrn_type='solid'):
+    def color_one_cell(self, row, column, color, patrn_type='solid'):  # TODO class
         """ Add background color for one cell """
         try:
             sheet = self._workbook.active
@@ -152,7 +174,7 @@ class FileXlsx:
         except Exception as e:
             print(f"ERROR: {e}")
 
-    def clear_color_cell(self, row, column):
+    def clear_color_cell(self, row, column):  # TODO class
         """ Clear one color cell """
         try:
             sheet = self._workbook.active
@@ -189,3 +211,7 @@ class FileXlsx:
                 self.clear_one_cell(row, column + 1)
         except Exception as e:
             print(f"ERROR: {e}")
+
+    def delete_rows(self):
+        sheet = self._workbook.active
+        sheet.delete_rows(idx=1, amount=5)
