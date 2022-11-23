@@ -61,11 +61,14 @@ class FileXlsx:  # TODO use os for getting the path without path
         except Exception as e:
             print(f"\nERROR: {e}")
 
-    def get_row(self, row_nbr):
+    def get_row(self, value):
+        """ Searching the row by value. """
         sheet = self._workbook.active
         try:
-            sheet.iter_rows()
-            print()
+            for row in sheet.iter_rows(min_row=2, min_col=1, values_only=True):
+                if value in row:
+                    return row
+            return None
         except Exception as e:
             print(f"\nERROR: {e}")
 

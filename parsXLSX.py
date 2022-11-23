@@ -143,16 +143,13 @@ if __name__ == "__main__":
     """ Get values from main file """
     main_workbook = FileXlsx('./Silvery_Port.xlsx')
     main_header_names = main_workbook.get_first_row()
-    print(main_header_names)
-    main_workbook.set_column_header_count(len(main_header_names))
-    `
 
+    main_workbook.set_column_header_count(len(main_header_names))
+    print(main_workbook.get_row(57965113))
 
     new_header = main_header_names + ['Дата послупления']
 
     # main_workbook.get_values_from_column('Номер вагона')
-
-
 
     # main_workbook = load_workbook(xlsx_file)  # path to the Excel file
     # sheet = main_workbook.active
