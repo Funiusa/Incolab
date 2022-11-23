@@ -90,6 +90,11 @@ def get_data_from_main_file(path_to_main_file, wagons):
     return values_list
 
 
+def add_new_value_in_row(old_row, value):
+    return tuple(list(old_row) + [value])
+
+
+
 def fill_new_xlsx(new_xlsx, values):
     """ Getting  Values from main file """
     row, column = new_xlsx.rows_count(), new_xlsx.get_column_header_count()
@@ -141,13 +146,17 @@ if __name__ == "__main__":
     wagons_list = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
 
     """ Get values from main file """
-    main_workbook = FileXlsx('./Silvery_Port.xlsx')
-    main_header_names = main_workbook.get_first_row()
+    main_workbook = FileXlsx('./Silvery_Port.xlsx')  # Create a class
+    main_file_header = main_workbook.get_first_row()  # Get the names of columns from main file
+    main_workbook.set_column_header_count(len(main_file_header))  # Set the length of columns in main file
+    row = main_workbook.get_row(57965113)
 
-    main_workbook.set_column_header_count(len(main_header_names))
-    print(main_workbook.get_row(57965113))
 
-    new_header = main_header_names + ['Дата послупления']
+
+
+    """ Values for new file """
+    newfile_header = main_file_header + ['Дата послупления']  # Create the header for new file
+    print(add_new_value_in_row(row, time.strftime("%x")))  # Create the row
 
     # main_workbook.get_values_from_column('Номер вагона')
 
