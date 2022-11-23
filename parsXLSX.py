@@ -14,16 +14,11 @@ from file_xlsx import FileXlsx
 xlsx_file = Path('./Silvery_Port.xlsx')
 new_file_path = './test.xlsx'
 
-COLOR_HEADER = 'FFC000'
-COLOR_GRAY = 'BDBBB6'
-COLOR_PINK = 'E5D1D0'
+HEADER = 'FFC000'
+GRAY = 'BDBBB6'
+PINK = 'E5D1D0'
 LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
-
-
-# Retrieve cell value
-
-# listCabin = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
 
 
 def fill_row(sheet, row, col, color):
@@ -39,25 +34,26 @@ def create_header(new_xlsx, names_list):  # TODO
     column = new_xlsx.get_column_header_count()
     new_xlsx.row_stretch(column)
     new_xlsx.row_filling(1, column, names_list)
-    new_xlsx.color_row(1, 1, column, COLOR_HEADER)
-    #new_xlsx.wrap_row(1, 1, column + 1)
+    new_xlsx.color_row(1, 1, column, HEADER)
+    new_xlsx.wrap_row(1, 1, column + 1)
     # new_xlsx.freez_panes_header()
     new_xlsx.border_bottom_row(1, 1, column)
     new_xlsx.save()
 
 
-def get_values(sheet, rw, colons):
-    return [sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
+def get_values(wb_sheet, rw, colons):
+    return [wb_sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
 
 
-def fill_rows(sheet, row):  # main file
+def fill_rows(wb_sheet, row):
+    """ Filling rows in the main file """
     column = 1
-    while sheet.cell(row, column).value:
-        sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_PINK)
+    while wb_sheet.cell(row, column).value:
+        wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=PINK)
         column += 1
     """ Add date on the last cell and fill background """
-    sheet.cell(row, column).value = time.strftime("%x")
-    sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_GRAY)
+    wb_sheet.cell(row, column).value = time.strftime("%x")
+    wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=GRAY)
 
 
 def get_current_weight_sum(path_to_file, wagons):
@@ -119,7 +115,7 @@ def grand_total_handler(file_path, newxls):
     print(f"total row: {row}, column {column}")  # delete
     newxls.one_cell_filling(row + 1, column - 1, "Итого:")
     newxls.one_cell_filling(row + 1, column, sum(weight_list))
-    newxls.color_row(row + 1, 1, column, COLOR_HEADER, 'mediumGray')
+    newxls.color_row(row + 1, 1, column, HEADER, 'mediumGray')
 
 
 def addition_elements(newxls, weight_sum):  # TODO
@@ -131,8 +127,8 @@ def addition_elements(newxls, weight_sum):  # TODO
     newxls.color_one_cell(row - 1, column + 1, LIGHT_GREEN)
     newxls.one_cell_filling(row - 1, column + 2, 5)
     """ Sum """
-    new_xls.color_row(row, 1, column, LIGHT_GREEN)
-    new_xls.border_bottom_row(row, 1, newxls.last_column_count())
+    newxls.color_row(row, 1, column, LIGHT_GREEN)
+    newxls.border_bottom_row(row, 1, newxls.last_column_count())
     newxls.one_cell_filling(row, column + 1, "Сумма:")
     newxls.color_one_cell(row, column + 1, LIGHT_GREEN)
     newxls.one_cell_filling(row, column + 2, weight_sum)
@@ -140,27 +136,42 @@ def addition_elements(newxls, weight_sum):  # TODO
 
 if __name__ == "__main__":
     """ Test values """
-    wagons_list = [57588279, 64130933, 56918501, 56249444, 61893335]
+
+    #wagons_list = [57588279, 64130933, 56918501, 56249444, 61893335]
+    wagons_list = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
 
     """ Get values from main file """
-    main_workbook = load_workbook(xlsx_file)  # path to the Excel file
-    sheet = main_workbook.active
-    rows = sheet.max_row
-    columns = sheet.max_column
-    header_names = [cell.value for cell in list(sheet.rows)[0] if cell.value] + ['Дата послупления']
-    values_from_main_file = get_data_from_main_file(xlsx_file, wagons_list)
-    current_weight_sum = sum(get_current_weight_sum(xlsx_file, wagons_list))
+    main_workbook = FileXlsx('./Silvery_Port.xlsx')
+    main_header_names = main_workbook.get_first_row()
+    print(main_header_names)
+    main_workbook.set_column_header_count(len(main_header_names))
+    `
 
-    """ Create new file if doesn't exist """
-    new_xls = FileXlsx(new_file_path)
-    create_header(new_xls, header_names)
-    """ Adding new values """
-    fill_new_xlsx(new_xls, values_from_main_file)
-    """ Adding sum and count elements """
-    """ Adding total sum """
-    addition_elements(new_xls, current_weight_sum)
-    grand_total_handler(new_file_path, new_xls)
 
-    new_xls.save()
-    new_xls.close()
+    new_header = main_header_names + ['Дата послупления']
+
+    # main_workbook.get_values_from_column('Номер вагона')
+
+
+
+    # main_workbook = load_workbook(xlsx_file)  # path to the Excel file
+    # sheet = main_workbook.active
+    # rows = sheet.max_row
+    # columns = sheet.max_column
+    # header_names = [cell.value for cell in list(sheet.rows)[0] if cell.value] + ['Дата послупления']
+    # values_from_main_file = get_data_from_main_file(xlsx_file, wagons_list)
+    # current_weight_sum = sum(get_current_weight_sum(xlsx_file, wagons_list))
+    #
+    # """ Create new file if doesn't exist """
+    # new_xls = FileXlsx(new_file_path)
+    # create_header(new_xls, header_names)
+    # """ Adding new values """
+    # fill_new_xlsx(new_xls, values_from_main_file)
+    # """ Adding sum and count elements """
+    # """ Adding total sum """
+    # addition_elements(new_xls, current_weight_sum)
+    # grand_total_handler(new_file_path, new_xls)
+
+    # new_xls.save()
+    # new_xls.close()
     print("Done")

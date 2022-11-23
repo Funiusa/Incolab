@@ -3,7 +3,8 @@ from openpyxl.comments import Comment
 from openpyxl.styles import Alignment, PatternFill, Border, Side
 from pathlib import Path
 from os import path
-import openpyxl
+from pandas import read_excel
+from math import isnan
 
 
 class FileXlsx:  # TODO use os for getting the path without path
@@ -39,6 +40,34 @@ class FileXlsx:  # TODO use os for getting the path without path
         """ Calculate how many column in file """
         for elem in self._workbook.active.values:
             return len(elem)
+
+    def get_first_row(self):
+        sheet = self._workbook.active
+        try:
+            for row in sheet.iter_rows(min_row=1,  max_row=1, values_only=True):
+                return [elem for elem in row]
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    def get_values_from_column(self, header_name):
+        """ Get values from column needed,
+            reading file using pandas library,
+            return all data without None element """
+        try:
+            column_data = read_excel(self._path_to_file).to_dict('list')[header_name]
+            return list(filter(lambda val: not isnan(val), column_data))
+        except KeyError:
+            print(f'The value "{ header_name }" does not exist in current file')
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    def get_row(self, row_nbr):
+        sheet = self._workbook.active
+        try:
+            sheet.iter_rows()
+            print()
+        except Exception as e:
+            print(f"\nERROR: {e}")
 
     def one_cell_filling(self, row, column, value):
         """ Add element in one cell """
@@ -150,6 +179,7 @@ class FileXlsx:  # TODO use os for getting the path without path
     'gray125', 'darkDown', 'lightHorizontal', 'lightVertical', 
     'solid', 'lightGray', 'darkTrellis', 'darkVertical', 'mediumGray',
      'darkGray', 'darkGrid', 'darkUp', 'lightGrid', 'gray0625'"""
+
     # Create subclass for colors
     def color_one_cell(self, row, column, color, patrn_type='solid'):  # TODO class
         """ Add background color for one cell """
@@ -229,6 +259,6 @@ class FileXlsx:  # TODO use os for getting the path without path
         sheet = self._workbook.active
         try:
             for i in range(columns):
-                sheet.column_dimensions[chr(ord('A') + i)].width = 13
+                sheet.column_dimensions[chr(ord('A') + i)].width = 10
         except Exception as e:
             print(f"\nERROR: {e}")
