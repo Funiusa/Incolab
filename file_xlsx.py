@@ -23,6 +23,12 @@ class FileXlsx:  # TODO use os for getting the path without path
         self.nfound_elems = []
         self.header_for_newfile = None
 
+    def rows_count_increment(self):
+        self._rowCount += 1
+
+    def get_rows_count(self):
+        return self._rowCount
+
     def set_column_header_count(self, value):
         self._columnHeaderCount = value
 
