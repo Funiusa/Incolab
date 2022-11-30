@@ -72,7 +72,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         try:
             for row in sheet.iter_rows(min_row=2, min_col=1, values_only=True):
                 if value in row:
-                    return row
+                    return tuple([elem for elem in row if elem is not None])
             return False
         except Exception as e:
             print(f"\nERROR: {e}")
