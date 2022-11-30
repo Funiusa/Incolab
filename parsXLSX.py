@@ -165,7 +165,6 @@ def data_handler(main_file, wagons, newfile_path):
             main_file.exists_elems.append(wagon)
 
 
-
 def handler_main_file(main_file, wagons):
     """ Color the got row in main file and add the timestamp in the end """
     for wagon in wagons:
@@ -179,8 +178,7 @@ def handler_main_file(main_file, wagons):
 
 
 """ TODO check if wagons already was fix the names. 
-    TODO Check if main file doesn't exist 
-    TODO Check if elements exist in file. Add in list and log it """
+    TODO Check if main file doesn't exist  """
 if __name__ == "__main__":
 
     """ Test values """
@@ -189,8 +187,11 @@ if __name__ == "__main__":
 
     """ Paths """
     main_file_path = './Silvery_Port.xlsx'
-    new_file_path = './test.xlsx'
+    if not path.lexists(main_file_path):
+        print("The main file doesn't exist.")
+        exit(-1)
 
+    new_file_path = './test.xlsx'
     """ Get values from main file for new file """
     main_workbook = FileXlsx(main_file_path)  # Create a class
     data_handler(main_workbook, wagons_list, new_file_path)
