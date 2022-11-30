@@ -91,8 +91,7 @@ def get_data_from_main_file(path_to_main_file, wagons):
 
 
 def add_new_value_in_row(old_row, value):
-    return tuple(list(old_row) + [value])
-
+    return old_row + (value, )
 
 
 def fill_new_xlsx(new_xlsx, values):
@@ -118,8 +117,8 @@ def grand_total_handler(file_path, newxls):
     row, column = newxls.rows_count(), newxls.get_column_header_count()
 
     print(f"total row: {row}, column {column}")  # delete
-    newxls.one_cell_filling(row + 1, column - 1, "Итого:")
-    newxls.one_cell_filling(row + 1, column, sum(weight_list))
+    newxls.cell_filling(row + 1, column - 1, "Итого:")
+    newxls.cell_filling(row + 1, column, sum(weight_list))
     newxls.color_row(row + 1, 1, column, HEADER, 'mediumGray')
 
 
@@ -128,35 +127,64 @@ def addition_elements(newxls, weight_sum):  # TODO
 
     print(f"row {row}, column {column}, last column count {newxls.last_column_count()}")  # delete
     """ Count """
-    newxls.one_cell_filling(row - 1, column + 1, "Кол-во:")
-    newxls.color_one_cell(row - 1, column + 1, LIGHT_GREEN)
-    newxls.one_cell_filling(row - 1, column + 2, 5)
+    newxls.cell_filling(row - 1, column + 1, "Кол-во:")
+    newxls.color_cell(row - 1, column + 1, LIGHT_GREEN)
+    newxls.cell_filling(row - 1, column + 2, 5)
     """ Sum """
     newxls.color_row(row, 1, column, LIGHT_GREEN)
     newxls.border_bottom_row(row, 1, newxls.last_column_count())
-    newxls.one_cell_filling(row, column + 1, "Сумма:")
-    newxls.color_one_cell(row, column + 1, LIGHT_GREEN)
-    newxls.one_cell_filling(row, column + 2, weight_sum)
+    newxls.cell_filling(row, column + 1, "Сумма:")
+    newxls.color_cell(row, column + 1, LIGHT_GREEN)
+    newxls.cell_filling(row, column + 2, weight_sum)
 
 
-if __name__ == "__main__":
+def fill_row_in_main_file():
+    pass
+
+
+def data_handler(main_file, wagons, newfile_path):
+    """ Get the number of columns in first row in main file """
+    nbr_columns = len(main_file.get_first_row())
+    main_file.set_column_header_count(nbr_columns)
+    if not path.lexists(newfile_path):
+        """ Create the header for the new file if file doesn't exist """
+        main_file.received_items_list = [add_new_value_in_row(main_file.get_first_row(), 'Дата послупления')]
+    """ Get the data from main file and add in line new element with timestamp. Using wagons list """
+    for wagon in wagons:
+        row = main_file.get_row(wagon)  # Get the row
+        main_file.received_items_list.append(add_new_value_in_row(row, time.strftime("%x")), )  # tuple
+        main_file.current_weight_sum += row[-2]  # Get current weight for new file
+
+
+def handler_main_file(main_file, wagons):
+    """ Color the got row in main file and add the timestamp in the end """
+    for wagon in wagons:
+        row = main_file.get_row_number(wagon)  # Get the row number
+        last_column = main_file.get_column_header_count()  # Get the last column
+        main_file.color_row(row, 1, last_column, PINK)  # Fill the row
+        main_file.cell_filling(row, last_column + 1, time.strftime("%x"))
+        main_file.color_cell(row, last_column + 1, GRAY)
+    main_file.save()
+
+
+if __name__ == "__main__":  # TODO fill main
     """ Test values """
-
     #wagons_list = [57588279, 64130933, 56918501, 56249444, 61893335]
-    wagons_list = [54864947, 57965113, 61494944, 56662430, 60848967, 58061458]
+    wagons_list = (54864947, 57965113, 61494944, 56662430, 60848967, 58061458)
 
-    """ Get values from main file """
-    main_workbook = FileXlsx('./Silvery_Port.xlsx')  # Create a class
-    main_file_header = main_workbook.get_first_row()  # Get the names of columns from main file
-    main_workbook.set_column_header_count(len(main_file_header))  # Set the length of columns in main file
-    row = main_workbook.get_row(57965113)
+    """ Paths """
+    main_file_path = './Silvery_Port.xlsx'
+    new_file_path = './Povogonka_test.xlsx'
 
+    """ Get values from main file for new file """
+    main_workbook = FileXlsx(main_file_path)  # Create a class
+    data_handler(main_workbook, wagons_list, new_file_path)
+    handler_main_file(main_workbook, wagons_list)
+    """ Values  """
+    # new_xlsx = FileXlsx(new_file_path)
 
-
-
-    """ Values for new file """
-    newfile_header = main_file_header + ['Дата послупления']  # Create the header for new file
-    print(add_new_value_in_row(row, time.strftime("%x")))  # Create the row
+    #print(add_new_value_in_row(row, time.strftime("%x")))
+      # Create the row
 
     # main_workbook.get_values_from_column('Номер вагона')
 

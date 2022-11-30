@@ -17,6 +17,9 @@ class FileXlsx:  # TODO use os for getting the path without path
         self._workbook = load_workbook(Path(path_to_file))
         self._rowCount = 0
         self._columnHeaderCount = 0
+        self.current_weight_sum = 0.0
+        self.received_items_list = []
+        self.header_for_newfile = None
 
     def set_column_header_count(self, value):
         self._columnHeaderCount = value
@@ -45,7 +48,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         sheet = self._workbook.active
         try:
             for row in sheet.iter_rows(min_row=1,  max_row=1, values_only=True):
-                return [elem for elem in row]
+                return tuple([elem for elem in row if elem is not None])
         except Exception as e:
             print(f"\nERROR: {e}")
 
@@ -62,17 +65,30 @@ class FileXlsx:  # TODO use os for getting the path without path
             print(f"\nERROR: {e}")
 
     def get_row(self, value):
-        """ Searching the row by value. """
+        """ Searching the row by value. Else return False """
         sheet = self._workbook.active
         try:
             for row in sheet.iter_rows(min_row=2, min_col=1, values_only=True):
                 if value in row:
                     return row
-            return None
+            return False
         except Exception as e:
             print(f"\nERROR: {e}")
 
-    def one_cell_filling(self, row, column, value):
+    def get_row_number(self, value):
+        """ Searching the row by value. Else return False """
+        sheet = self._workbook.active
+        try:
+            num = 2
+            for row in sheet.iter_rows(min_row=2, min_col=1, values_only=True):
+                if value in row:
+                    return num
+                num += 1
+            return 0
+        except Exception as e:
+            print(f"\nERROR: {e}")
+
+    def cell_filling(self, row, column, value):
         """ Add element in one cell """
         sheet = self._workbook.active
         try:
@@ -137,7 +153,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         """
         try:
             for column in range(column_end):
-                self.one_cell_filling(row, column + 1, values[column])
+                self.cell_filling(row, column + 1, values[column])
         except Exception as e:
             print(f"ERROR: {e}")
 
@@ -148,7 +164,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         """
         try:
             for value in values:
-                self.one_cell_filling(start_row, column, value)
+                self.cell_filling(start_row, column, value)
                 start_row += 1
         except Exception as e:
             print(f"ERROR: {e}")
@@ -184,7 +200,7 @@ class FileXlsx:  # TODO use os for getting the path without path
      'darkGray', 'darkGrid', 'darkUp', 'lightGrid', 'gray0625'"""
 
     # Create subclass for colors
-    def color_one_cell(self, row, column, color, patrn_type='solid'):  # TODO class
+    def color_cell(self, row, column, color, patrn_type='solid'):  # TODO class
         """ Add background color for one cell """
         try:
             sheet = self._workbook.active
@@ -196,7 +212,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         """ Add background color for cells in row """
         try:
             for i in range(end_column):
-                self.color_one_cell(row, first_column + i, color, patrn_type)
+                self.color_cell(row, first_column + i, color, patrn_type)
         except Exception as e:
             print(f"ERROR: {e}")
 
@@ -204,7 +220,7 @@ class FileXlsx:  # TODO use os for getting the path without path
         """ Add background color for cells in column """
         try:
             for i in range(end_row - 1):
-                self.color_one_cell(start_row + i, column, color, patrn_type)
+                self.color_cell(start_row + i, column, color, patrn_type)
         except Exception as e:
             print(f"ERROR: {e}")
 
