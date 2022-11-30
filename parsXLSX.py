@@ -151,14 +151,19 @@ def data_handler(main_file, wagons, newfile_path):
         main_file.received_items_list = [add_new_value_in_row(main_file.get_first_row(), 'Дата послупления')]
     """ Get the data from main file and add in line new element with timestamp. Using wagons list """
     for wagon in wagons:
-        row = main_file.get_row(wagon)  # Get the row
+        row = main_file.get_row(wagon)  # Get row
         if row is False:
-            print(f"Wagon: {wagon} doesn't exist in list of wagons")
-            continue
-        """ If element already exist with datetime skip """
-        if len(row) == nbr_columns:
+            """ If element already exist with datetime skip """
+            main_file.nfound_elems.append(wagon)  # If elem not exist add it in list
+        elif row and nbr_columns == len(row):
+            """ Add new element in list and calculate current sum """
             main_file.received_items_list.append(row)  # tuple
             main_file.current_weight_sum += row[-1]  # Get current weight for new file
+
+        else:
+            """ If element already exist with datetime skip and add in list """
+            main_file.exists_elems.append(wagon)
+
 
 
 def handler_main_file(main_file, wagons):
@@ -174,8 +179,8 @@ def handler_main_file(main_file, wagons):
 
 
 """ TODO check if wagons already was fix the names. 
-                                TODO Check if main file doesn't exist 
-                                TODO Check if elements exist in file. Add in list and log it """
+    TODO Check if main file doesn't exist 
+    TODO Check if elements exist in file. Add in list and log it """
 if __name__ == "__main__":
 
     """ Test values """
@@ -183,7 +188,7 @@ if __name__ == "__main__":
     wagons_list = (54864947, 57965113, 61494944, 56662430, 60848967, 58061458)
 
     """ Paths """
-    main_file_path = './__Silvery_Port.xlsx'
+    main_file_path = './Silvery_Port.xlsx'
     new_file_path = './test.xlsx'
 
     """ Get values from main file for new file """
@@ -212,6 +217,9 @@ if __name__ == "__main__":
     # create_header(new_xls, header_names)
     # """ Adding new values """
     print(main_workbook.received_items_list)
+
+    print("Can't find this wagons in main file: ", main_workbook.nfound_elems)
+    print("This wagons already exist in new file: ", main_workbook.exists_elems)
 
     #fill_new_xlsx(new_workbook, main_workbook.received_items_list)
     # """ Adding sum and count elements """

@@ -19,6 +19,8 @@ class FileXlsx:  # TODO use os for getting the path without path
         self._columnHeaderCount = 0
         self.current_weight_sum = 0.0
         self.received_items_list = []
+        self.exists_elems = []
+        self.nfound_elems = []
         self.header_for_newfile = None
 
     def set_column_header_count(self, value):
