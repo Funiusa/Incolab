@@ -41,7 +41,7 @@ def fill_new_xlsx(new_xlsx, values):  # TODO
             row += 1
         for value in values:
             new_xlsx.clear_color_row(row, column)  # Clear color row
-            new_xlsx.row_filling(row, column, value + (time.strftime("%x"), ))  # Adding timestamp in last column
+            new_xlsx.row_filling(row, column, value + (time.strftime("%x"),))  # Adding timestamp in last column
             new_xlsx.rows_count_increment()  # Calculate how much rows we are have
             row += 1
         new_xlsx.save()
@@ -82,7 +82,7 @@ def data_handler(main_file, wagons, newfile_path):
     main_file.set_column_header_count(nbr_columns)
     if path.lexists(newfile_path) is False:
         """ Create the header for the new file if file doesn't exist """
-        main_file.header_for_newfile = main_file.get_first_row() + ('Дата послупления', )
+        main_file.header_for_newfile = main_file.get_first_row() + ('Дата послупления',)
     """ Get the data from main file and add in line new element with timestamp. 
         Using wagons list """
     for wagon in wagons:
@@ -114,7 +114,9 @@ def handler_main_file(main_file, wagons):
 
 """ TODO check if wagons already was fix the names.
 TODO check if list of wagons not empty """
-def povogonka(wagons_list, main_file_path, new_file_path):
+
+
+def povogonka(main_file_path, new_file_path, wagons_list):
     """ Paths """
     if not path.lexists(main_file_path):
         print("The main file doesn't exist.")
@@ -138,4 +140,3 @@ def povogonka(wagons_list, main_file_path, new_file_path):
     print("Can't find this wagons in main file: ", main_workbook.nfound_elems)
     print("This wagons already exist in new file: ", main_workbook.exists_elems)
     print("Done")
-

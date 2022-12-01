@@ -1,59 +1,61 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter import messagebox as mb
 from parsXLSX import povogonka
 
 
-def get_main_file():
-    """Open a file for editing."""
-    filepath = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
-    if not filepath:
-        return "./Wagons.xlsx"
-    return filepath
+class Window(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.main_path = None
+        self.new_path = None
+        self.tuple_wagons = None
 
+        self.title("Incolab - Wagons")
+        self.geometry("400x300")
+        self.txt_edit = tk.Text(self, bd=4, width=20, height=30)
+        frm_buttons = tk.Frame(self, relief=tk.FLAT, bd=4)
+        main_file_path = tk.Button(frm_buttons, text="Путь к основному файлу", command=self.open_file)
+        new_file_path = tk.Button(frm_buttons, text="Путь к новому файлу", command=self.save_file)
+        btn_start = tk.Button(frm_buttons, text="Старт", command=self.start)
+        btn_close = tk.Button(frm_buttons, text="Выход", command=self.close_window)
 
-def save_results():
-    """Save the current file as a new file."""
-    filepath = asksaveasfilename(defaultextension=".xlsx", filetypes=[("Text Files", "xlsx")])
-    if not filepath:
-        return
-    text = txt_edit.get("1.0", tk.END)
-    try:
+        main_file_path.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
+        new_file_path.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
+        btn_start.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
+        btn_close.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
+        frm_buttons.grid(row=0, column=0, sticky="ns")
+        self.txt_edit.grid(row=0, column=1, sticky="nsew")
 
-    #povogonka(tuple(int(elem) for elem in text.splitlines()), )
-        print(tuple(int(elem) for elem in text.splitlines()), )
-    except ValueError:
-        print(f"Номером вагона может быть только число")
-    except Exception as e:
-        print(e)
-    txt_edit.delete("1.0", tk.END)
-    window.title(f"Simple Text Editor - {filepath}")
+    def open_file(self):
+        path_to_file = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
+        self.main_path = path_to_file
 
+    def save_file(self):
+        path_to_file = asksaveasfilename(defaultextension=".xlsx", filetypes=[("Text Files", "xlsx")])
+        if not path_to_file:
+            return "./Wagons.xlsx"
+        self.new_path = path_to_file
 
-def close_window():
-    window.destroy()
+    def start(self):
 
+        try:
+            text = self.txt_edit.get("1.0", tk.END)
+            self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
+            povogonka(self.main_path, self.new_path, self.tuple_wagons)
+            self.txt_edit.delete("1.0", tk.END)
+        except ValueError:
+            mb.showerror("Ошибка", "Номером вагона может быть только числом")
+        except Exception as e:
+            mb.showerror("Ошибка", f"{e}")
 
+    def close_window(self):
+        self.destroy()
 
 
 if __name__ == "__main__":
-    window = tk.Tk()
-    window.title("Incolab - Wagons")
+    root = Window()
+    root.mainloop()
 
-    window.rowconfigure(0, minsize=80, weight=1)
-    window.columnconfigure(1, minsize=80, weight=1)
 
-    txt_edit = tk.Text(window, bd=4, width=20, height=30)
-    frm_buttons = tk.Frame(window, relief=tk.FLAT, bd=4)
-    mainfile_path = tk.Button(frm_buttons, text="Путь к основному файлу", command=get_main_file)
-    newfile_path = tk.Button(frm_buttons, text="Путь к новому файлу", command=save_results)
-    btn_start = tk.Button(frm_buttons, text="Старт", command=save_results)
-    btn_close = tk.Button(frm_buttons, text="Выход", command=close_window)
-
-    mainfile_path.grid(row=0, column=0, sticky="ew", padx=5, pady=5)
-    newfile_path.grid(row=1, column=0, sticky="ew", padx=5, pady=5)
-    btn_start.grid(row=2, column=0, sticky="ew", padx=5, pady=5)
-    btn_close.grid(row=3, column=0, sticky="ew", padx=5, pady=5)
-    frm_buttons.grid(row=0, column=0, sticky="ns")
-    txt_edit.grid(row=0, column=1, sticky="nsew")
-    window.mainloop()
 
