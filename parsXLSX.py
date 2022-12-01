@@ -21,62 +21,44 @@ LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
 
 
-def fill_row(sheet, row, col, color):
-    for i in range(1, col):
-        sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
+# def fill_row(sheet, row, col, color):
+#     for i in range(1, col):
+#         sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
 
 
-def get_values(wb_sheet, rw, colons):
-    return [wb_sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
+# def get_values(wb_sheet, rw, colons):
+#     return [wb_sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
 
 
-def fill_rows(wb_sheet, row):
-    """ Filling rows in the main file """
-    column = 1
-    while wb_sheet.cell(row, column).value:
-        wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=PINK)
-        column += 1
-    """ Add date on the last cell and fill background """
-    wb_sheet.cell(row, column).value = time.strftime("%x")
-    wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=GRAY)
+# def fill_rows(wb_sheet, row):
+#     """ Filling rows in the main file """
+#     column = 1
+#     while wb_sheet.cell(row, column).value:
+#         wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=PINK)
+#         column += 1
+#     """ Add date on the last cell and fill background """
+#     wb_sheet.cell(row, column).value = time.strftime("%x")
+#     wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=GRAY)
 
 
-def get_current_weight_sum(path_to_file, wagons):
-    """ From main file
-        Read the values of the file in the dataframe
-        Convert file in dict for keys and values """
-    excel_data = pd.read_excel(path_to_file)
-    exel_values = excel_data.to_dict('dict')
-    cabin_num = []
-    weight = excel_data.get("Фактический вес")
-    for name, val in exel_values.items():
-        if name == 'Номер вагона':
-            for key, wagon in val.items():
-                if wagon in wagons:
-                    cabin_num.append(key)
-
-    return [weight[elem] for elem in cabin_num]
-
-
-def get_data_from_main_file(path_to_main_file, wagons):
-    """
-        Get the values from the main table and colorized
-        First row and column in header """
-    values_list = []
-    for row in range(2, rows):
-        for column in range(1, columns):
-            cell = sheet.cell(row, column)
-            if cell.value in wagons:
-                values_list += [get_values(sheet, row, column + 1) + [time.strftime("%x")]]
-                fill_rows(sheet, row)
-
-    """ Safe changes in the main file """
-    main_workbook.save(path_to_main_file)
-    return values_list
+# def get_current_weight_sum(path_to_file, wagons):
+#     """ From main file
+#         Read the values of the file in the dataframe
+#         Convert file in dict for keys and values """
+#     excel_data = pd.read_excel(path_to_file)
+#     exel_values = excel_data.to_dict('dict')
+#     cabin_num = []
+#     weight = excel_data.get("Фактический вес")
+#     for name, val in exel_values.items():
+#         if name == 'Номер вагона':
+#             for key, wagon in val.items():
+#                 if wagon in wagons:
+#                     cabin_num.append(key)
+#     return [weight[elem] for elem in cabin_num]
 
 
-def add_new_value_in_row(old_row, value):
-    return old_row + (value, )
+# def add_new_value_in_row(old_row, value):
+#     return old_row + (value, )
 
 
 def create_header(new_xlsx, main_wrk):  # TODO
@@ -90,7 +72,6 @@ def create_header(new_xlsx, main_wrk):  # TODO
         new_xlsx.row_filling(1, column, main_wrk.header_for_newfile)
         new_xlsx.color_row(1, 1, column, HEADER)
         new_xlsx.wrap_row(1, 1, column + 1)
-        # new_xlsx.freez_panes_header()
         new_xlsx.border_bottom_row(1, 1, column)
         new_xlsx.save()
 
@@ -105,7 +86,7 @@ def fill_new_xlsx(new_xlsx, values):  # TODO
         else:
             new_xlsx.clear_color_row(row, column)
         for value in values:
-            new_xlsx.row_filling(row, column, add_new_value_in_row(value, time.strftime("%x")))
+            new_xlsx.row_filling(row, column, value + (time.strftime("%x"),))
             new_xlsx.rows_count_increment()
             row += 1
         new_xlsx.save()
@@ -145,8 +126,9 @@ def data_handler(main_file, wagons, newfile_path):
     main_file.set_column_header_count(nbr_columns)
     if path.lexists(newfile_path) is False:
         """ Create the header for the new file if file doesn't exist """
-        main_file.header_for_newfile = add_new_value_in_row(main_file.get_first_row(), 'Дата послупления')
-    """ Get the data from main file and add in line new element with timestamp. Using wagons list """
+        main_file.header_for_newfile = main_file.get_first_row() + ('Дата послупления', )
+    """ Get the data from main file and add in line new element with timestamp. 
+        Using wagons list """
     for wagon in wagons:
         row = main_file.get_row(wagon)  # Get row
         if row is False:
@@ -170,8 +152,8 @@ def handler_main_file(main_file, wagons):
             main_file.color_row(row, 1, last_column, PINK)  # Fill the row
             main_file.cell_filling(row, last_column + 1, time.strftime("%x"))
             main_file.color_cell(row, last_column + 1, GRAY)
-    main_file.save()
-    main_file.close()
+    # main_file.save()
+    # main_file.close()
 
 
 """ TODO check if wagons already was fix the names.
