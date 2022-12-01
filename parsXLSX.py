@@ -11,54 +11,11 @@ from openpyxl import Workbook
 
 from file_xlsx import FileXlsx
 
-xlsx_file = Path('./Silvery_Port.xlsx')
-new_file_path = './test.xlsx'
-
 HEADER = 'FFC000'
 GRAY = 'BDBBB6'
 PINK = 'E5D1D0'
 LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
-
-
-# def fill_row(sheet, row, col, color):
-#     for i in range(1, col):
-#         sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
-
-
-# def get_values(wb_sheet, rw, colons):
-#     return [wb_sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
-
-
-# def fill_rows(wb_sheet, row):
-#     """ Filling rows in the main file """
-#     column = 1
-#     while wb_sheet.cell(row, column).value:
-#         wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=PINK)
-#         column += 1
-#     """ Add date on the last cell and fill background """
-#     wb_sheet.cell(row, column).value = time.strftime("%x")
-#     wb_sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=GRAY)
-
-
-# def get_current_weight_sum(path_to_file, wagons):
-#     """ From main file
-#         Read the values of the file in the dataframe
-#         Convert file in dict for keys and values """
-#     excel_data = pd.read_excel(path_to_file)
-#     exel_values = excel_data.to_dict('dict')
-#     cabin_num = []
-#     weight = excel_data.get("Фактический вес")
-#     for name, val in exel_values.items():
-#         if name == 'Номер вагона':
-#             for key, wagon in val.items():
-#                 if wagon in wagons:
-#                     cabin_num.append(key)
-#     return [weight[elem] for elem in cabin_num]
-
-
-# def add_new_value_in_row(old_row, value):
-#     return old_row + (value, )
 
 
 def create_header(new_xlsx, main_wrk):  # TODO
@@ -157,20 +114,11 @@ def handler_main_file(main_file, wagons):
 
 """ TODO check if wagons already was fix the names.
 TODO check if list of wagons not empty """
-if __name__ == "__main__":
-
-    """ Test values """
-    # wagons_list = ()
-    # wagons_list = (57588279, 64130933, 56918501, 56249444, 61893335, 3452452)
-    wagons_list = (54864947, ) #, 57965113, 61494944, 55760896, 56662430, 60848967, 58061458)
-
+def povogonka(wagons_list, main_file_path, new_file_path):
     """ Paths """
-    main_file_path = './Silvery_Port.xlsx'
     if not path.lexists(main_file_path):
         print("The main file doesn't exist.")
         exit(-1)
-
-    new_file_path = './test.xlsx'
     """ Get values from main file for new file """
     main_workbook = FileXlsx(main_file_path)  # Create a class
     data_handler(main_workbook, wagons_list, new_file_path)
