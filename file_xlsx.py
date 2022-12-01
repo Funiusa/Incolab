@@ -26,7 +26,7 @@ class FileXlsx:  # TODO use os for getting the path without path
     def rows_count_increment(self):
         self._rowCount += 1
 
-    def get_rows_count(self):
+    def get_current_rows_count(self):
         return self._rowCount
 
     def set_column_header_count(self, value):
@@ -45,7 +45,7 @@ class FileXlsx:  # TODO use os for getting the path without path
 
     def rows_count(self):
         """ Calculate how many rows in file """
-        return len([row for row in self._workbook.active.values])
+        return self._workbook.active.max_row
 
     def last_column_count(self):
         """ Calculate how many column in file """
@@ -270,9 +270,13 @@ class FileXlsx:  # TODO use os for getting the path without path
         except Exception as e:
             print(f"ERROR: {e}")
 
-    def delete_rows(self):
+    def delete_several_rows(self, start, amount):
         sheet = self._workbook.active
-        sheet.delete_rows(idx=1, amount=5)
+        sheet.delete_rows(idx=start, amount=amount)
+
+    def delete_row(self, index):
+        sheet = self._workbook.active
+        sheet.delete_rows(idx=index, amount=1)
 
     def freez_panes_header(self):
         """ Freeze """
