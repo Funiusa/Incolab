@@ -8,6 +8,7 @@ from collections.abc import Iterable
 from file_xlsx import FileXlsx
 from os import path
 from openpyxl import Workbook
+from tkinter import messagebox as mb
 
 from file_xlsx import FileXlsx
 
@@ -117,10 +118,6 @@ TODO check if list of wagons not empty """
 
 
 def povogonka(main_file_path, new_file_path, wagons_list):
-    """ Paths """
-    if not path.lexists(main_file_path):
-        print("The main file doesn't exist.")
-        exit(-1)
     """ Get values from main file for new file """
     main_workbook = FileXlsx(main_file_path)  # Create a class
     data_handler(main_workbook, wagons_list, new_file_path)
@@ -136,7 +133,7 @@ def povogonka(main_file_path, new_file_path, wagons_list):
     grand_total_sum(new_file_path, new_workbook)
     new_workbook.save()
     new_workbook.close()
-
-    print("Can't find this wagons in main file: ", main_workbook.nfound_elems)
-    print("This wagons already exist in new file: ", main_workbook.exists_elems)
-    print("Done")
+    if main_workbook.nfound_elems:
+        mb.showinfo("Warning", f"Вагоны с номерами: {main_workbook.nfound_elems} не найдены.")
+    if main_workbook.exists_elems:
+        mb.showinfo("Warning", f"Вагоны с номерами: {main_workbook.exists_elems} уже внесены в новый список.")
