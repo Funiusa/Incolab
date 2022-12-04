@@ -1,109 +1,58 @@
-import openpyxl
-import pandas as pd
-from pathlib import Path
-from math import isnan
-import time
-from openpyxl.styles import PatternFill
-import datetime
-from openpyxl import Workbook
-from openpyxl.styles import Alignment
-
-from file_xlsx import FileXlsx
-
-xlsx_file = Path('./Silvery_Port.xlsx')
-path_for_new_file = './Povogonka.xlsx'
-
-COLOR_HEADER = 'FFC000'
-COLOR_GRAY = 'BDBBB6'
-COLOR_PINK = 'E5D1D0'
-
-# Retrieve cell value
-listCabin = [57588279, 64130933, 56918501, 56249444, 61893335]
+import tkinter as tk
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter import messagebox as mb
+from parsXLSX import povogonka
 
 
-def fill_row(sheet, row, col, color):
-    for i in range(1, col):
-        sheet.cell(row, i).fill = PatternFill(patternType='solid', fgColor=color)
+class Window(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.main_path = None
+        self.new_path = None
+        self.tuple_wagons = None
 
+        self.title("Wagons")
+        self.maxsize(370, 610)
+        self.minsize(370, 610)
+        self.txt_edit = tk.Text(self, bd=4, width=20, height=20, relief=tk.SUNKEN)
+        frm_buttons = tk.Frame(self, relief=tk.FLAT, bd=4, height=10)
+        main_file_path = tk.Button(text="Путь к исходному файлу", command=self.open_file)
+        new_file_path = tk.Button(text="Путь к новому файлу", command=self.save_file)
+        btn_start = tk.Button(text="Старт", command=self.start)
+        btn_close = tk.Button(text="Выход", command=self.close_window)
 
-def create_xlsx_file_header(path, filename, names_list):
-    count = len(names_list)
-    newxl = FileXlsx(path, filename)
-    newxl.row_filling(1, count, names_list)
-    newxl.color_row(1, 1, count, COLOR_HEADER)
-    newxl.wrap_row(1, 1, count + 1)
-    return newxl
+        self.txt_edit.pack(side=tk.TOP, fill=tk.X)
+        frm_buttons.pack(side=tk.BOTTOM)
+        main_file_path.pack(anchor="n", padx=4, pady=1, fill=tk.X)
+        new_file_path.pack(anchor="n", padx=4, pady=1, fill=tk.X)
+        btn_start.pack(anchor="n", padx=4, pady=1, fill=tk.X)
+        btn_close.pack(anchor="n", padx=4, pady=1, fill=tk.X)
 
+    def open_file(self):
+        path_to_file = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
+        self.main_path = path_to_file
 
-def get_values(sheet, rw, colons):
-    return [sheet.cell(row=rw, column=colon).value for colon in range(1, colons + 1)]
+    def save_file(self):
+        path_to_file = asksaveasfilename(defaultextension=".xlsx", filetypes=[("Text Files", "xlsx")])
+        if not path_to_file:
+            return "./Wagons.xlsx"
+        self.new_path = path_to_file
 
+    def start(self):
 
-def fill_rows(sheet, row):
-    column = 1
-    while sheet.cell(row, column).value:
-        sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_PINK)
-        column += 1
-    """Add date on the last cell and fill background"""
-    sheet.cell(row, column).value = datetime.datetime.now().strftime("%x")
-    sheet.cell(row, column).fill = PatternFill(patternType='solid', fgColor=COLOR_GRAY)
+        try:
 
+            text = self.txt_edit.get("1.0", tk.END)
+            self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
+            povogonka(self.main_path, self.new_path, self.tuple_wagons)
+            self.txt_edit.delete("1.0", tk.END)
+            self.txt_edit.insert(tk.END, "Success!")
+        except TypeError:
+            mb.showerror("Ошибка", "Не указан путь к исходному файлу")
+        except ValueError:
+            mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
+        except Exception as e:
+            mb.showerror("Ошибка", f"{e}")
 
-def add_new_elements():
-    pass
-
-
-
-def readXSLX():
-
-    # Load the xlsx file
-    # excel_data = pd.read_excel(xlsx_file)
-    # # Read the values of the file in the dataframe
-    # exel_values = excel_data.to_dict('list')
-    # cabin = exel_values.get('Номер вагона')
-    # weight = exel_values.get('Фактический вес')
-    # if isnan(cabin[-1]):
-    #     cabin.pop()
-    #     weight.pop()
-    #
-    # cabin_and_weight = {}
-    # count_cabins = len(cabin)
-    # if len(cabin) == len(weight):
-    #     cabin_and_weight = {cabin[i]: weight[i] for i in range(count_cabins)}
-
-    main_workbook = openpyxl.load_workbook(xlsx_file)  # path to the Excel file
-    sheet = main_workbook.active
-    rows = sheet.max_row
-    columns = sheet.max_column
-    header_names = [cell.value for cell in list(sheet.rows)[0] if cell.value]
-    header_names.append('Дата послупления')
-    print(sheet.print_title_cols)
-    """
-        Get the values from the main table
-        First row and column is header
-    """
-    values_list = []
-    for row in range(2, rows):
-        for column in range(1, columns):
-            cell = sheet.cell(row, column)
-            if cell.value in listCabin:
-                values_list += [get_values(sheet, row, column + 1) + [time.strftime("%x")]]
-
-                fill_rows(sheet, row)
-    """ Safe changes in the main file """
-    main_workbook.save(xlsx_file)
-
-    newxls = create_xlsx_file_header('./', 'test.xlsx', header_names)
-    row = 2  # Because we already have a header
-    for value in values_list:
-        newxls.row_filling(row, len(value), value)
-        row += 1
-
-
-
-    newxls.save()
-
-
-if __name__ == "__main__":
-    # take_values()
-    readXSLX()
+    def close_window(self):
+        self.destroy()
