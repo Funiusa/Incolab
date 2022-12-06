@@ -1,15 +1,9 @@
-from openpyxl import load_workbook
 import pandas as pd
-from pathlib import Path
 from math import isnan
-from openpyxl.styles import PatternFill
 import time
 from collections.abc import Iterable
-from file_xlsx import FileXlsx
 from os import path
-from openpyxl import Workbook
 from tkinter import messagebox as mb
-
 from file_xlsx import FileXlsx
 
 HEADER = 'FFC000'
