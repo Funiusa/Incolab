@@ -15,6 +15,7 @@ class Window(tk.Tk):
         # Adding a title to the window
         self.wm_title("Incolab - Wagons")
         self.minsize(370, 790)
+        self.maxsize(370, 790)
         # creating a frame and assigning it to container
         container = tk.Frame(self)
         # specifying the region where the frame is packed in root
@@ -74,7 +75,7 @@ class MainPage(tk.Frame):
         self.email = tk.BooleanVar()
         self.controller = controller
 
-        tk.Frame.__init__(self, parent, width=200)
+        tk.Frame.__init__(self, parent)
         self.pack(anchor="n", side=tk.LEFT)
         buttons_dict = {"Путь к исходному файлу": self.get_main_file_path,
                         "Путь к новому файлу": self.save_new_file,
@@ -84,30 +85,31 @@ class MainPage(tk.Frame):
 
         def texts(root):
             row = tk.Frame(root)
+            row.pack(side="top", padx=5, pady=5)
             lbl = tk.Label(row, text="Insert list of wagons")
             ent = tk.Text(row, width=30)
-            row.pack(side="top", fill=tk.X, padx=5, pady=5)
             lbl.pack()
             ent.pack(side="left")
 
         def checkboxes(root):
             row = tk.Frame(root)
-            row.pack(side="top", fill=tk.X, padx=5, pady=5)
             checkbox = tk.Checkbutton(
                 row,
                 text="Put if you want to send a file",
                 variable=root.email,
                 onvalue=True,
                 offvalue=False,
+                width=30,
             )
-            checkbox.pack(side="top", expand=True, fill=tk.X)
+            checkbox.pack(side="top", expand=True)
+            row.pack(side="top", fill=tk.X, padx=5, pady=5)
 
         def buttons(root, bns):
             row = tk.Frame(root)
-            row.pack(side="top", fill=tk.X, padx=5, pady=5)
             for name, cmd in bns.items():
-                b = tk.Button(row, text=name, command=cmd)
-                b.pack(side="top", expand=True, fill=tk.X)
+                b = tk.Button(row, text=name, command=cmd, width=30,)
+                b.pack(side="top", expand=True, padx=2, pady=2)
+            row.pack(side="top", padx=5, pady=5)
 
         """ Options elements """
         texts(self)
