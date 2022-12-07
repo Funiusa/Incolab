@@ -42,6 +42,8 @@ class Window(tk.Tk):
         # raises the current frame to the top
         frame.tkraise()
 
+# TODO reformat the classes
+
 
 class MainPage(tk.Frame):
     def get_main_file_path(self):
@@ -51,14 +53,12 @@ class MainPage(tk.Frame):
         self.new_file_path = asksaveasfilename(defaultextension=".xlsx", filetypes=[("Text Files", "xlsx")])
 
     def start(self):
-        if self.email.get():
-            self.controller.show_frame(EmailPage)
         try:
-            text = self.txt_edit.get("1.0", tk.END)
+            text = self.txt.get("1.0", tk.END)
             self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
             povogonka(self.main_file_path, self.new_file_path, self.tuple_wagons)
-            self.txt_edit.delete("1.0", tk.END)
-            self.txt_edit.insert(tk.END, "Success!")
+            self.txt.delete("1.0", tk.END)  # Maby it would destroy
+            self.txt.insert(tk.END, "Success!")
             if self.email.get():
                 self.controller.show_frame(EmailPage)
         except TypeError:
@@ -72,6 +72,7 @@ class MainPage(tk.Frame):
         self.tuple_wagons = None
         self.main_file_path = None
         self.new_file_path = None
+        self.txt = None
         self.email = tk.BooleanVar()
         self.controller = controller
 
@@ -90,6 +91,7 @@ class MainPage(tk.Frame):
             ent = tk.Text(row, width=30)
             lbl.pack()
             ent.pack(side="left")
+            return ent
 
         def checkboxes(root):
             row = tk.Frame(root)
@@ -112,7 +114,7 @@ class MainPage(tk.Frame):
             row.pack(side="top", padx=5, pady=5)
 
         """ Options elements """
-        texts(self)
+        self.txt = texts(self)
         checkboxes(self)
         buttons(self, buttons_dict)
 
