@@ -6,6 +6,7 @@ from tkinter import messagebox as mb
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from parsXLSX import povogonka
+from sentEmail import mail_sandler
 
 
 class Window(tk.Tk):
@@ -15,7 +16,7 @@ class Window(tk.Tk):
         self.wm_title("Incolab - Wagons")
         self.minsize(370, 790)
         # creating a frame and assigning it to container
-        container = tk.Frame(self, height=370, width=720)
+        container = tk.Frame(self)
         # specifying the region where the frame is packed in root
         container.pack(side="left", anchor='n', expand=True)
 
@@ -51,95 +52,102 @@ class MainPage(tk.Frame):
     def start(self):
         if self.email.get():
             self.controller.show_frame(EmailPage)
-        # try:
-        #     text = self.txt_edit.get("1.0", tk.END)
-        #     self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
-        #     povogonka(self.main_file_path, self.new_file_path, self.tuple_wagons)
-        #     self.txt_edit.delete("1.0", tk.END)
-        #     self.txt_edit.insert(tk.END, "Success!")
-        #     if self.email.get():
-        #         self.controller.show_frame(EmailPage)
-        # except TypeError:
-        #     mb.showerror("Ошибка", "Не указан путь к исходному файлу")
-        # except ValueError:
-        #     mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
-        # except Exception as e:
-        #     mb.showerror("Ошибка", f"{e}")
-
+        try:
+            text = self.txt_edit.get("1.0", tk.END)
+            self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
+            povogonka(self.main_file_path, self.new_file_path, self.tuple_wagons)
+            self.txt_edit.delete("1.0", tk.END)
+            self.txt_edit.insert(tk.END, "Success!")
+            if self.email.get():
+                self.controller.show_frame(EmailPage)
+        except TypeError:
+            mb.showerror("Ошибка", "Не указан путь к исходному файлу")
+        except ValueError:
+            mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
+        except Exception as e:
+            mb.showerror("Ошибка", f"{e}")
 
     def __init__(self, parent, controller):
-
         self.tuple_wagons = None
         self.main_file_path = None
         self.new_file_path = None
         self.email = tk.BooleanVar()
         self.controller = controller
 
-        tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Addition wagons list")
-        label.pack(padx=10, pady=10)
-        self.txt_edit = tk.Text(self, bd=4, relief=tk.SUNKEN)
-        self.txt_edit.pack(side=tk.TOP, fill=tk.X)
+        tk.Frame.__init__(self, parent, width=200)
+        self.pack(anchor="n", side=tk.LEFT)
+        buttons_dict = {"Путь к исходному файлу": self.get_main_file_path,
+                        "Путь к новому файлу": self.save_new_file,
+                        "Старт": lambda: self.start(),
+                        "Выход": lambda: self.quit(),
+                        }
+
+        def texts(root):
+            row = tk.Frame(root)
+            lbl = tk.Label(row, text="Insert list of wagons")
+            ent = tk.Text(row, width=30)
+            row.pack(side="top", fill=tk.X, padx=5, pady=5)
+            lbl.pack()
+            ent.pack(side="left")
+
+        def checkboxes(root):
+            row = tk.Frame(root)
+            row.pack(side="top", fill=tk.X, padx=5, pady=5)
+            checkbox = tk.Checkbutton(
+                row,
+                text="Put if you want to send a file",
+                variable=root.email,
+                onvalue=True,
+                offvalue=False,
+            )
+            checkbox.pack(side="top", expand=True, fill=tk.X)
+
+        def buttons(root, bns):
+            row = tk.Frame(root)
+            row.pack(side="top", fill=tk.X, padx=5, pady=5)
+            for name, cmd in bns.items():
+                b = tk.Button(row, text=name, command=cmd)
+                b.pack(side="top", expand=True, fill=tk.X)
 
         """ Options elements """
-        # We use the switch_window_button in order to call the show_frame() method as a lambda function
-        checkbox = tk.Checkbutton(
-            self,
-            text="Send file on the email",
-            variable=self.email,
-            onvalue=True,
-            offvalue=False,
-        )
-        checkbox.pack(pady=2, fill=tk.X)
-        # Get path for main file
-        main_file_path_button = tk.Button(
-            self,
-            text="Путь к исходному файлу",
-            command=self.get_main_file_path,
-        )
-        main_file_path_button.pack(pady=2, fill=tk.X)
-        # Save new file
-        new_file_path_button = tk.Button(
-            self,
-            text="Путь к новому файлу",
-            command=self.save_new_file,
-        )
-        new_file_path_button.pack(pady=2, fill=tk.X)
-        # Start button
-        exit_button = tk.Button(
-            self,
-            text="Старт",
-            command=lambda: self.start(),
-        )
-        exit_button.pack(pady=2, fill=tk.X)
-        # Exit button
-        exit_button = tk.Button(
-            self,
-            text="Exit",
-            command=lambda: controller.destroy(),
-        )
-        exit_button.pack(pady=2, fill=tk.X)
-
-        self.pack(anchor="n", side=tk.LEFT)
+        texts(self)
+        checkboxes(self)
+        buttons(self, buttons_dict)
 
 
 class EmailPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="This is page for sending email")
-        label.pack(padx=10, pady=10)
+        fields = 'Адрес получателя: ', 'Адрес отправителя: ', 'Пароль: ', 'Тема письма: '
 
-        self.txt_edit = tk.Text(self, width=5, height=1, bd=4, relief=tk.SUNKEN)
-        self.txt_edit.pack(side=tk.TOP, fill=tk.X)
+        def send(entries):
+            mail_sandler()
 
-        self.txt_edit = tk.Text(self, width=10, height=20, bd=4, relief=tk.SUNKEN)
-        self.txt_edit.pack(side=tk.TOP, fill=tk.X)
-        switch_window_button = tk.Button(
-            self,
-            text="Exit",
-            command=controller.destroy,
-        )
-        switch_window_button.pack(side="bottom", fill=tk.X)
+        def makeform(root, fields):
+            entries = []
+            for field in fields:
+                row = tk.Frame(root)
+                lab = tk.Label(row, width=15, text=field, anchor='w')
+                ent = tk.Entry(row)
+                row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+                lab.pack(side=tk.LEFT)
+                ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+                entries.append((field, ent))
+            return entries
+
+        def message_body(root):
+            row = tk.Frame(root)
+            ent = tk.Text(row)
+            row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+            ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+
+        evnts = makeform(self, fields)
+        message_body(self)
+        self.bind('<Return>', (lambda event, e=evnts: send(e)))
+        b1 = tk.Button(self, text='Send', command=(lambda e=evnts: send(e)))
+        b1.pack(side=tk.LEFT, padx=5, pady=5)
+        b2 = tk.Button(self, text='Quit', command=self.quit)
+        b2.pack(side=tk.LEFT, padx=5, pady=5)
 
 # class CompletionScreen(tk.Frame):
 #     def __init__(self, parent, controller):

@@ -5,7 +5,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-def mail_sandler():
+def mail_sandler(sender_email, receiver_email, password, subject, body):
     subject = "Вам письмо"
     body = """Привет моя дорогая, Маша!
     \nЯ тебя очень жду в Актау!\nСкучаю и схожу с ума по тебе и без тебя!
