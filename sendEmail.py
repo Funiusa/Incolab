@@ -5,14 +5,14 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-def mail_sandler(sender_email, receiver_email, password, subject, body):
-    subject = "Вам письмо"
-    body = """Привет моя дорогая, Маша!
-    \nЯ тебя очень жду в Актау!\nСкучаю и схожу с ума по тебе и без тебя!
-    """
-    sender_email = "babakhinSV@gmail.com"
-    receiver_email = "Kristall_68@inbox.ru"
-    password = input("Type your password and press enter: ")
+def mail_sendler(receiver_email, sender_email, password, subject, body):
+    # subject = "Вам письмо"
+    # body = """Привет моя дорогая, Маша!
+    # \nЯ тебя очень жду в Актау!\nСкучаю и схожу с ума по тебе и без тебя!
+    # """
+    # sender_email = "babakhinSV@gmail.com"
+    # receiver_email = "Kristall_68@inbox.ru"
+    # password = input("Type your password and press enter: ")
 
     # Create a multipart message and set headers
     message = MIMEMultipart()
@@ -24,7 +24,7 @@ def mail_sandler(sender_email, receiver_email, password, subject, body):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
 
-    filename = "love.jpg"  # In same directory as script
+    filename = "test.xlsx"  # In same directory as script
 
     try:
         # Open PDF file in binary mode
@@ -57,6 +57,3 @@ def mail_sandler(sender_email, receiver_email, password, subject, body):
         server.quit()
     print("Message was successfully sent")
 
-
-if __name__ == "__main__":
-    mail_sandler()

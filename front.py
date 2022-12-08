@@ -4,9 +4,8 @@ from tkinter.messagebox import showinfo
 from tkinter import Frame
 from tkinter import messagebox as mb
 from tkinter.filedialog import askopenfilename, asksaveasfilename
-
 from parsXLSX import povogonka
-from sentEmail import mail_sandler
+from sendEmail import mail_sendler
 
 
 class Window(tk.Tk):
@@ -86,12 +85,11 @@ class MainPage(tk.Frame):
 
         def texts(root):
             row = tk.Frame(root)
-            row.pack(side="top", padx=5, pady=5)
-            lbl = tk.Label(row, text="Insert list of wagons")
-            ent = tk.Text(row, width=30)
-            lbl.pack()
-            ent.pack(side="left")
-            return ent
+            row.pack(side="top", padx=5, pady=10)
+            txt = tk.Text(row, width=30)
+            txt.insert('1.0', "Insert list of wagons here")
+            txt.pack(side="left")
+            return txt
 
         def checkboxes(root):
             row = tk.Frame(root)
@@ -115,6 +113,7 @@ class MainPage(tk.Frame):
 
         """ Options elements """
         self.txt = texts(self)
+        self.txt.bind("<Button-1>", lambda event: self.txt.delete('1.0', tk.END))
         checkboxes(self)
         buttons(self, buttons_dict)
 
@@ -122,151 +121,46 @@ class MainPage(tk.Frame):
 class EmailPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        fields = 'Адрес получателя: ', 'Адрес отправителя: ', 'Пароль: ', 'Тема письма: '
+        fields = 'Кому', 'От кого', 'Пароль', 'Тема письма'
 
-        def send(entries):
-            mail_sandler()
-
-        def makeform(root, fields):
-            entries = []
-            for field in fields:
+        def makeform(root, flds):
+            entrys = []
+            for field in flds:
                 row = tk.Frame(root)
-                lab = tk.Label(row, width=15, text=field, anchor='w')
-                ent = tk.Entry(row)
                 row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-                lab.pack(side=tk.LEFT)
-                ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
-                entries.append((field, ent))
-            return entries
+                if field == 'Тема письма':
+                    ent = tk.Entry(row)
+                    ent.insert('0', field)
+                    ent.bind('<Button-1>', lambda event: ent.delete('0', tk.END))
+                    ent.pack(fill=tk.X, padx=4)
+                else:
+                    lab = tk.Label(row, padx=4, text=field, anchor='w')
+                    ent = tk.Entry(row, width=30)
+                    lab.pack(side=tk.LEFT)
+                    ent.pack(side=tk.RIGHT, fill=tk.X, padx=4)
+                entrys.append(ent)
+            return entrys
 
         def message_body(root):
             row = tk.Frame(root)
-            ent = tk.Text(row)
-            row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-            ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+            scroll_bar = tk.Scrollbar(row)
+            scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
+            text = tk.Text(row, yscrollcommand=scroll_bar.set)
+            text.insert('1.0', "Insert your message here")
+            row.pack(side=tk.TOP, fill=tk.X, padx=8, pady=4)
+            text.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+            return text
 
-        evnts = makeform(self, fields)
-        message_body(self)
-        self.bind('<Return>', (lambda event, e=evnts: send(e)))
-        b1 = tk.Button(self, text='Send', command=(lambda e=evnts: send(e)))
-        b1.pack(side=tk.LEFT, padx=5, pady=5)
-        b2 = tk.Button(self, text='Quit', command=self.quit)
-        b2.pack(side=tk.LEFT, padx=5, pady=5)
+        def send_email(entrs, body):
+            values = [entr.get() for entr in entrs]
+            values.append(body.get("1.0", tk.END))
+            #               To, From who,  Password, Theme, Body message
+            mail_sendler(values[0], values[1], values[2], values[3], values[4])
 
-# class CompletionScreen(tk.Frame):
-#     def __init__(self, parent, controller):
-#         tk.Frame.__init__(self, parent)
-#         label = tk.Label(self, text="Completion Screen, we did it!")
-#         label.pack(padx=10, pady=10)
-#         switch_window_button = ttk.Button(
-#             self, text="Return to menu", command=lambda: controller.show_frame(MainPage)
-#         )
-#         switch_window_button.pack(side="bottom", fill=tk.X)
-
-# class Window(tk.Tk):
-#     def __init__(self):
-#         super().__init__()
-#
-#         # configure the root window
-#         self.title('My Awesome App')
-#         self.geometry("300x300")
-#         self.main_frame = tk.Frame(self, relief=tk.FLAT, border=4)
-#         self.main_frame.pack(anchor="n", side=tk.LEFT)
-#
-#         self.text_edit(self.main_frame)
-#         self.path_main_button(self.main_frame)
-#         # # label
-#         # self.label = ttk.Label(self, text='Hello, Tkinter!')
-#         # self.label.pack()
-#
-#
-#         # # button
-#         # self.button = ttk.Button(self, text='Click Me')
-#         # self.button['command'] = self.button_clicked
-#         # self.button.pack()
-#
-#     def text_edit(self, master):
-#         text = tk.Text(master, bd=4, relief=tk.SUNKEN)
-#         text.pack(side=tk.TOP, fill=tk.X)
-#
-#     def open_file(self):
-#         return askopenfilename(filetypes=[("Text Files", "*.xlsx")])
-#
-#     def path_main_button(self, master):
-#         button_main = tk.Button(master, text="Путь к исходному файлу", command=self.open_file)
-#         button_main.pack(pady=2, fill=tk.X)
-
-
-# class Window(tk.Tk):
-#     def __init__(self):
-#         super().__init__()
-#         self.main_path = None
-#         self.new_path = None
-#         self.tuple_wagons = None
-#         """ Main window """
-#         self.title("Wagons")
-#         self.maxsize(370, 720)
-#         self.minsize(370, 720)
-#         """ Text form """
-#         self.window = self
-#         """ Button form """
-#         # frm = tk.Frame(self.window, relief=tk.FLAT, bd=4, padx=5, pady=5)
-#         # frm.pack(anchor="n", side=tk.LEFT)
-#         # self.txt_edit = tk.Text(frm, bd=4, relief=tk.SUNKEN)
-#         # main_file_path = tk.Button(frm, text="Путь к исходному файлу", command=self.open_file)
-#         # new_file_path = tk.Button(frm, text="Путь к новому файлу", command=self.save_file)
-#         # btn_start = tk.Button(frm, text="Старт", command=self.start)
-#         # btn_close = tk.Button(frm, text="Выход", command=self.close_window)
-#         #
-#         # """ Options elements """
-#         # self.txt_edit.pack(side=tk.TOP, fill=tk.X)
-#         # main_file_path.pack(pady=2, fill=tk.X)
-#         # new_file_path.pack(pady=2, fill=tk.X)
-#         # btn_start.pack(pady=2, fill=tk.X)
-#         # btn_close.pack(pady=2, fill=tk.X)
-#
-#     def base(self, window):
-#         frm = tk.Frame(window, relief=tk.FLAT, bd=4, padx=5, pady=5)
-#         frm.pack(anchor="n", side=tk.LEFT)
-#         txt_edit = tk.Text(frm, bd=4, relief=tk.SUNKEN)
-#         main_file_path = tk.Button(frm, text="Путь к исходному файлу", command=self.open_file)
-#         new_file_path = tk.Button(frm, text="Путь к новому файлу", command=self.save_file)
-#         btn_start = tk.Button(frm, text="Старт", command=self.start)
-#         btn_close = tk.Button(frm, text="Выход", command=self.close_window)
-#
-#         """ Options elements """
-#         txt_edit.pack(side=tk.TOP, fill=tk.X)
-#         main_file_path.pack(pady=2, fill=tk.X)
-#         new_file_path.pack(pady=2, fill=tk.X)
-#         btn_start.pack(pady=2, fill=tk.X)
-#         btn_close.pack(pady=2, fill=tk.X)
-#
-#     def open_file(self):
-#         path_to_file = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
-#         self.main_path = path_to_file
-#
-#     def save_file(self):
-#         path_to_file = asksaveasfilename(defaultextension=".xlsx", filetypes=[("Text Files", "xlsx")])
-#         if not path_to_file:
-#             return "./Wagons.xlsx"
-#         self.new_path = path_to_file
-#
-#     def start(self):
-#
-#         try:
-#             self.base()
-#             text = self.txt_edit.get("1.0", tk.END)
-#             self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
-#             povogonka(self.main_path, self.new_path, self.tuple_wagons)
-#             self.txt_edit.delete("1.0", tk.END)
-#             self.txt_edit.insert(tk.END, "Success!")
-#         except TypeError:
-#             mb.showerror("Ошибка", "Не указан путь к исходному файлу")
-#         except ValueError:
-#             mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
-#         except Exception as e:
-#             mb.showerror("Ошибка", f"{e}")
-#
-#
-#     def close_window(self):
-#         self.destroy()
+        entries = makeform(self, fields)
+        txt = message_body(self)
+        txt.bind('<Button-1>', lambda event: txt.delete("1.0", tk.END))
+        send_btn = tk.Button(self, text='Send', command=lambda: send_email(entries, txt))
+        send_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
+        quit_bnt = tk.Button(self, text='Quit', command=self.quit)
+        quit_bnt.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=5, pady=5)
