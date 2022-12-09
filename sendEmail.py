@@ -45,5 +45,3 @@ def mail_sendler(receiver_email, sender_email, password, subject, body, file_pat
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, full_msg)
         server.quit()
-
-

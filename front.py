@@ -133,16 +133,15 @@ class EmailPage(tk.Frame):
             mb.showinfo("", "Сообщение успешно отправлено")
         except TypeError:
             mb.showerror("Error", "Не указан файл для отправки")
-        except Exception as e:
-            mb.showerror("ERROR", f"{e}")
-            # if errno.EIO == 5:
-            #     mb.showerror("Error",
-            #                  f"Ошибка: файл с именем {os.path.basename(self.controller.new_file_path)} не существует")
-            # self.controller.show_frame(MainPage)
             self.controller.new_file_path = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
-        except:
-            mb.showerror("ERROR",
-                         f"""Логин или пароль указаны не верно. Или не настроена почта для отправки сообщений.""")
+        except Exception as e:
+            mb.showerror("Error", f"{e}")
+            # mb.showerror("Error",
+            #                  f"Ошибка: файл с именем {os.path.basename(self.controller.new_file_path)} не существует")
+            #     self.controller.new_file_path = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
+            # else:
+            #     mb.showerror("ERROR",
+            #                  f"""Логин или пароль указаны не верно. Или не настроена почта для отправки сообщений.""")
 
     def __init__(self, parent, controller):
         self.controller = controller
