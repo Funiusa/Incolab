@@ -107,10 +107,6 @@ def handler_main_file(main_file, wagons):
     main_file.close()
 
 
-""" TODO check if wagons already was fix the names.
-TODO check if list of wagons not empty """
-
-
 def povogonka(main_file_path, new_file_path, wagons_list):
     """ Get values from main file for new file """
     main_workbook = FileXlsx(main_file_path)  # Create a class

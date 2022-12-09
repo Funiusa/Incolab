@@ -1,7 +1,4 @@
-import errno
-import os.path
 import tkinter as tk
-import traceback
 from tkinter import messagebox as mb
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
