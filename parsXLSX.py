@@ -13,7 +13,7 @@ LIGHT_GREEN = 'B7DEB9'
 DEEP_GREEN = '7BC77F'
 
 
-def create_header(new_xlsx, main_wrk):  # TODO
+def create_header(new_xlsx, main_wrk):
     """ Create header for new file
         and get the columns number """
     if main_wrk.header_for_newfile is not None:
@@ -28,7 +28,7 @@ def create_header(new_xlsx, main_wrk):  # TODO
         new_xlsx.save()
 
 
-def fill_new_xlsx(new_xlsx, values):  # TODO
+def fill_new_xlsx(new_xlsx, values):
     """ Getting  Values from main file """
     try:
         row, column = new_xlsx.rows_count(), len(new_xlsx.get_first_row())
@@ -37,14 +37,14 @@ def fill_new_xlsx(new_xlsx, values):  # TODO
         for value in values:
             new_xlsx.clear_color_row(row, column)  # Clear color row
             new_xlsx.row_filling(row, column, value + (time.strftime("%x"),))  # Adding timestamp in last column
-            new_xlsx.rows_count_increment()  # Calculate how much rows we are have
+            new_xlsx.rows_count_increment()  # Calculate how much rows we have
             row += 1
         new_xlsx.save()
     except Exception as e:
         print(f"Error: {e}")
 
 
-def add_sum_count(new_xlsx, weight_sum):  # TODO
+def add_sum_count(new_xlsx, weight_sum):
     row, column = new_xlsx.rows_count(), len(new_xlsx.get_first_row())
     if row > 1 and new_xlsx.get_current_rows_count():
         """ Sum """
@@ -112,7 +112,6 @@ def povogonka(main_file_path, new_file_path, wagons_list):
     main_workbook = FileXlsx(main_file_path)  # Create a class
     data_handler(main_workbook, wagons_list, new_file_path)
     handler_main_file(main_workbook, wagons_list)
-
     """ Adding new values """
     new_workbook = FileXlsx(new_file_path)
     create_header(new_workbook, main_workbook)
@@ -124,6 +123,7 @@ def povogonka(main_file_path, new_file_path, wagons_list):
     new_workbook.save()
     new_workbook.close()
     if main_workbook.nfound_elems:
-        mb.showinfo("Warning", f"Вагоны с номерами: {main_workbook.nfound_elems} не найдены.")
-    if main_workbook.exists_elems:
-        mb.showinfo("Warning", f"Вагоны с номерами: {main_workbook.exists_elems} уже внесены в новый список.")
+        return {"not_found": main_workbook.nfound_elems}
+    elif main_workbook.exists_elems:
+        return {"exist": main_workbook.exists_elems}
+    return 0

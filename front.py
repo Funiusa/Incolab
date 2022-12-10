@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox as mb
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
+from parsXLSX import povogonka
 from sendEmail import mail_sendler
 
 
@@ -33,6 +34,8 @@ class Window(tk.Tk):
         self.show_frame(MainPage)
         # Variable for using in ather frames
         self.new_file_path = None
+        # Variable for clicked form
+        self.form_num = 1
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -41,8 +44,6 @@ class Window(tk.Tk):
 
 
 # TODO reformat the classes
-
-
 class MainPage(tk.Frame):
     def get_main_file_path(self):
         self.main_file_path = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
@@ -52,16 +53,21 @@ class MainPage(tk.Frame):
 
     def start(self):
         try:
-            # text = self.txt_form.get("1.0", tk.END)
-            # self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
-            # povogonka(self.main_file_path, self.new_file_path, self.tuple_wagons)
-            # self.txt_form.delete("1.0", tk.END)  # Maby it would destroy
-            # self.txt_form.insert(tk.END, "Success!")
+            text = self.txt_form.get("1.0", tk.END)
+            self.tuple_wagons = tuple(int(elem) for elem in text.splitlines())
+            ret = povogonka(self.main_file_path, self.controller.new_file_path, self.tuple_wagons)
+            if ret:
+                for key, val in ret.items():
+                    if key == 'exist':
+                        mb.showinfo("Warning", f"Вагоны с номерами: {val} уже внесены в новый список.")
+                    else:
+                        mb.showinfo("Warning", f"Вагоны с номерами: {val} не найдены.")
+            else:
+                self.txt_form.delete("1.0", tk.END)  # Maby it would destroy
             if self.email.get():
                 self.controller.show_frame(EmailPage)
-
         except TypeError:
-            mb.showerror("Ошибка", "Не указан путь к исходному файлу")
+            mb.showerror("Ошибка", "Не указан путь к исходному или новому файлу")
         except ValueError:
             mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
         except Exception as e:
@@ -70,8 +76,8 @@ class MainPage(tk.Frame):
     def __init__(self, parent, controller):
         self.tuple_wagons = None
         self.main_file_path = None
-        # self.new_file_path = None
         self.txt_form = None
+        self.new_file = None
         self.email = tk.BooleanVar()
         self.controller = controller
 
@@ -112,9 +118,7 @@ class MainPage(tk.Frame):
             row.pack(side="top", padx=5, pady=5)
 
         """ Options elements """
-        texts(self)
-        self.new_file = None
-        # self.txt_form.bind("<Button-1>", lambda event: self.txt_form.delete('1.0', tk.END))
+        self.txt_form = texts(self)
         checkboxes(self)
         buttons(self, buttons_dict)
 
@@ -133,12 +137,6 @@ class EmailPage(tk.Frame):
             self.controller.new_file_path = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
         except Exception as e:
             mb.showerror("Error", f"{e}")
-            # mb.showerror("Error",
-            #                  f"Ошибка: файл с именем {os.path.basename(self.controller.new_file_path)} не существует")
-            #     self.controller.new_file_path = askopenfilename(filetypes=[("Text Files", "*.xlsx")])
-            # else:
-            #     mb.showerror("ERROR",
-            #                  f"""Логин или пароль указаны не верно. Или не настроена почта для отправки сообщений.""")
 
     def __init__(self, parent, controller):
         self.controller = controller
@@ -153,7 +151,6 @@ class EmailPage(tk.Frame):
                 if field == 'Тема письма':
                     ent = tk.Entry(row)
                     ent.insert('0', field)
-                    ent.bind('<Button-1>', lambda event: ent.delete('0', tk.END))
                     ent.pack(fill=tk.X, padx=4)
                 else:
                     lab = tk.Label(row, padx=4, text=field, anchor='w')
@@ -175,8 +172,9 @@ class EmailPage(tk.Frame):
 
         entries = makeform(self, fields)
         txt = message_body(self)
-        txt.bind('<Button-1>', lambda event: txt.delete("1.0", tk.END))
         send_btn = tk.Button(self, text='Send', command=lambda: self.send_email(entries, txt))
-        send_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
+        send_btn.pack(side="left", fill=tk.X, expand=True, padx=2, pady=5)
+        rtrn_btn = tk.Button(self, text="Back", command=lambda: self.controller.show_frame(MainPage))
+        rtrn_btn.pack(side="left", fill=tk.X, expand=True, padx=2, pady=5)
         quit_bnt = tk.Button(self, text='Quit', command=self.quit)
-        quit_bnt.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=5, pady=5)
+        quit_bnt.pack(side="right", fill=tk.X, expand=True, padx=2, pady=5)
