@@ -64,12 +64,13 @@ class MainPage(tk.Frame):
                         mb.showinfo("Warning", f"Вагоны с номерами: {val} не найдены.")
             else:
                 self.txt_form.delete("1.0", tk.END)  # Maby it would destroy
+                self.txt_form.insert("1.0", "Выполнено успешно!")
             if self.email.get():
                 self.controller.show_frame(EmailPage)
         except TypeError:
-            mb.showerror("Ошибка", "Не указан путь к исходному или новому файлу")
+            mb.showerror("Ошибка файла", "Не указан путь к исходному или новому файлу")
         except ValueError:
-            mb.showerror("Ошибка", "Номера вагонов отсутствуют или указаны с ошибкой")
+            mb.showerror("Ошибка данных", "Номера вагонов отсутствуют или указаны с ошибкой")
         except Exception as e:
             mb.showerror("Ошибка", f"{e}")
 
