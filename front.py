@@ -11,6 +11,8 @@ class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         # Adding a title to the window
+        photo = tk.PhotoImage(file="icon-wagon.png")
+        self.iconphoto(False, photo)
         self.wm_title("Incolab - Wagons")
         self.minsize(370, 780)
         self.maxsize(370, 780)
